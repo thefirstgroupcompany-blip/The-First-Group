@@ -5,7 +5,8 @@ import {
   getSystemInfo, watchSystemInfo, getClients, watchClient, getClientSubscriptions,
   freezeSubscription, unfreezeSubscription, getMonthlyFreezeQuota,
   getPaymentsByClient, getSessionsByClient, calculateClientLoyalty,
-  setClientPin, verifyClientPin, getAnnouncements, getClientWalletTransactions, clientPortalLogin
+  setClientPin, verifyClientPin, getAnnouncements, getClientWalletTransactions, clientPortalLogin,
+  generateClientWalletOtp
 } from '../services/db';
 import { Card, Button, Input, Badge, EmptyState, Spinner } from '../components/ui';
 import { formatCurrency, formatDateTime, formatDate, formatHoursClock, formatDurationArabic } from '../utils/constants';
@@ -86,6 +87,35 @@ export default function ClientPortalPage() {
   // Digital Wallet State
   const [walletTransactions, setWalletTransactions] = useState([]);
   const [showWalletLedger, setShowWalletLedger] = useState(false);
+  const [showOtpModal, setShowOtpModal] = useState(false);
+  const [generatingOtp, setGeneratingOtp] = useState(false);
+  const [otpCountdown, setOtpCountdown] = useState(0);
+
+  // OTP Countdown timer & auto-sync
+  useEffect(() => {
+    if (!showOtpModal || !client?.activeWalletOtp?.expiresAt) return;
+
+    const updateTime = () => {
+      const remaining = Math.max(0, Math.floor((Number(client.activeWalletOtp.expiresAt) - Date.now()) / 1000));
+      setOtpCountdown(remaining);
+    };
+
+    updateTime();
+    const interval = setInterval(updateTime, 1000);
+    return () => clearInterval(interval);
+  }, [showOtpModal, client?.activeWalletOtp?.expiresAt]);
+
+  const handleGenerateOtp = async () => {
+    if (!client?.id || generatingOtp) return;
+    setGeneratingOtp(true);
+    try {
+      await generateClientWalletOtp(client.id);
+    } catch (err) {
+      alert('حدث خطأ أثناء توليد الكود: ' + err.message);
+    } finally {
+      setGeneratingOtp(false);
+    }
+  };
 
   // 1. Load System Info and Announcements (no longer loads all clients)
   useEffect(() => {
@@ -1391,7 +1421,28 @@ export default function ClientPortalPage() {
             <div className="stat-val" style={{ fontSize: 24, fontWeight: 900, color: '#34d399', marginTop: 4, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
               {formatCurrency(client?.walletBalance || 0)}
             </div>
-            <div style={{ display: 'flex', gap: 5, marginTop: 8, justifyContent: 'center', flexWrap: 'wrap' }}>
+            <div style={{ display: 'flex', gap: 6, marginTop: 8, justifyContent: 'center', flexWrap: 'wrap' }}>
+              <button
+                type="button"
+                onClick={() => {
+                  setShowOtpModal(true);
+                  if (!client?.activeWalletOtp || client.activeWalletOtp.used || Date.now() > Number(client.activeWalletOtp.expiresAt)) {
+                    handleGenerateOtp();
+                  }
+                }}
+                style={{
+                  background: 'linear-gradient(135deg, #7e22ce, #9333ea)',
+                  border: '1px solid rgba(192, 132, 252, 0.4)',
+                  color: '#ffffff', borderRadius: 8, padding: '5px 10px',
+                  fontSize: 11, fontWeight: 800, cursor: 'pointer',
+                  fontFamily: 'Cairo, sans-serif',
+                  display: 'inline-flex', alignItems: 'center', gap: 5,
+                  boxShadow: '0 2px 8px rgba(147, 51, 234, 0.35)'
+                }}
+              >
+                <ShieldCheck size={13} />
+                <span>كود دفع الكافيه 🔐</span>
+              </button>
 
               <button
                 type="button"
@@ -1399,7 +1450,7 @@ export default function ClientPortalPage() {
                 style={{
                   background: 'rgba(255,255,255,0.08)',
                   border: '1px solid rgba(255,255,255,0.15)',
-                  color: '#93c5fd', borderRadius: 8, padding: '4px 8px',
+                  color: '#93c5fd', borderRadius: 8, padding: '5px 9px',
                   fontSize: 10.5, fontWeight: 700, cursor: 'pointer',
                   fontFamily: 'Cairo, sans-serif'
                 }}
@@ -1830,6 +1881,247 @@ export default function ClientPortalPage() {
           setHasSubmittedFeedback(true);
         }}
       />
+
+      {/* Client Wallet Security OTP Modal */}
+      {showOtpModal && (
+        <div style={{
+          position: 'fixed',
+          inset: 0,
+          background: 'rgba(0, 0, 0, 0.82)',
+          backdropFilter: 'blur(12px)',
+          WebkitBackdropFilter: 'blur(12px)',
+          zIndex: 9999,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          padding: 16
+        }}>
+          <div style={{
+            background: 'linear-gradient(180deg, #131d36 0%, #0a0f1d 100%)',
+            border: '1.5px solid rgba(168, 85, 247, 0.45)',
+            borderRadius: 24,
+            padding: '26px 20px',
+            maxWidth: 400,
+            width: '100%',
+            boxShadow: '0 20px 50px rgba(0, 0, 0, 0.7), 0 0 30px rgba(168, 85, 247, 0.25)',
+            textAlign: 'center',
+            position: 'relative'
+          }}>
+            {/* Close Button */}
+            <button
+              type="button"
+              onClick={() => setShowOtpModal(false)}
+              style={{
+                position: 'absolute',
+                top: 16,
+                left: 16,
+                background: 'rgba(255, 255, 255, 0.08)',
+                border: 'none',
+                borderRadius: '50%',
+                width: 32,
+                height: 32,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: '#cbd5e1',
+                cursor: 'pointer'
+              }}
+            >
+              <X size={18} />
+            </button>
+
+            {/* Shield Icon Header */}
+            <div style={{
+              width: 66,
+              height: 66,
+              borderRadius: '50%',
+              background: 'linear-gradient(135deg, rgba(168, 85, 247, 0.25), rgba(126, 34, 206, 0.45))',
+              border: '2px solid rgba(168, 85, 247, 0.6)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              margin: '0 auto 12px',
+              boxShadow: '0 0 25px rgba(168, 85, 247, 0.4)'
+            }}>
+              <ShieldCheck size={36} color="#d8b4fe" />
+            </div>
+
+            <h3 style={{ color: '#ffffff', fontSize: 18, fontWeight: 900, margin: '0 0 4px' }}>
+              🔐 كود الدفع المؤقت للكافيه
+            </h3>
+            <p style={{ color: '#94a3b8', fontSize: 12, margin: '0 0 16px', lineHeight: 1.5 }}>
+              أملِ هذا الكود للباريستا لإتمام الخصم من محفظتك بأمان
+            </p>
+
+            {/* State 1: Generating */}
+            {generatingOtp ? (
+              <div style={{ padding: '26px 0' }}>
+                <Spinner size="lg" />
+                <p style={{ color: '#c084fc', marginTop: 12, fontSize: 13, fontWeight: 700 }}>
+                  جارٍ توليد كود أمان جديد...
+                </p>
+              </div>
+            ) : (() => {
+              const otp = client?.activeWalletOtp;
+              const isConsumed = otp?.used;
+              const isExpired = !otp?.expiresAt || Date.now() > Number(otp.expiresAt);
+              const isValid = otp?.code && !isConsumed && !isExpired;
+
+              if (isValid) {
+                const digits = String(otp.code).split('');
+                const minutes = Math.floor(otpCountdown / 60);
+                const seconds = otpCountdown % 60;
+                const timeFormatted = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+
+                return (
+                  <div>
+                    {/* Digits Display */}
+                    <div style={{
+                      display: 'flex',
+                      justifyContent: 'center',
+                      gap: 10,
+                      marginBottom: 16,
+                      direction: 'ltr'
+                    }}>
+                      {digits.map((d, i) => (
+                        <div
+                          key={i}
+                          style={{
+                            width: 54,
+                            height: 62,
+                            borderRadius: 14,
+                            background: 'linear-gradient(135deg, rgba(168, 85, 247, 0.25), rgba(88, 28, 135, 0.45))',
+                            border: '2px solid #c084fc',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            fontSize: 32,
+                            fontWeight: 900,
+                            color: '#ffffff',
+                            boxShadow: '0 0 16px rgba(168, 85, 247, 0.45)'
+                          }}
+                        >
+                          {d}
+                        </div>
+                      ))}
+                    </div>
+
+                    {/* Live Countdown & Status */}
+                    <div style={{
+                      background: 'rgba(16, 185, 129, 0.12)',
+                      border: '1px solid rgba(16, 185, 129, 0.3)',
+                      borderRadius: 12,
+                      padding: '10px 14px',
+                      marginBottom: 16,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between'
+                    }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                        <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#34d399', display: 'inline-block', boxShadow: '0 0 8px #34d399' }} />
+                        <span style={{ color: '#34d399', fontSize: 12, fontWeight: 800 }}>
+                          كود نشط وجاهز للاستخدام
+                        </span>
+                      </div>
+                      <div style={{
+                        color: otpCountdown < 60 ? '#f87171' : '#fcd34d',
+                        fontSize: 13,
+                        fontWeight: 900,
+                        fontVariantNumeric: 'tabular-nums'
+                      }}>
+                        ⏳ متبقي {timeFormatted}
+                      </div>
+                    </div>
+                  </div>
+                );
+              }
+
+              if (isConsumed) {
+                return (
+                  <div style={{
+                    background: 'rgba(16, 185, 129, 0.12)',
+                    border: '1.5px solid rgba(16, 185, 129, 0.4)',
+                    borderRadius: 14,
+                    padding: '18px 14px',
+                    marginBottom: 16
+                  }}>
+                    <CheckCircle2 size={32} color="#34d399" style={{ margin: '0 auto 8px' }} />
+                    <h4 style={{ margin: '0 0 4px', color: '#ffffff', fontSize: 14, fontWeight: 900 }}>
+                      تم تأكيد وخصم الطلب بنجاح! ✓
+                    </h4>
+                    <p style={{ margin: 0, color: '#a7f3d0', fontSize: 11.5 }}>
+                      تم حرق الكود فورياً بنجاح لحماية رصيد محفظتك.
+                    </p>
+                  </div>
+                );
+              }
+
+              // Expired or none
+              return (
+                <div style={{
+                  background: 'rgba(239, 68, 68, 0.12)',
+                  border: '1.5px solid rgba(239, 68, 68, 0.35)',
+                  borderRadius: 14,
+                  padding: '16px 14px',
+                  marginBottom: 16
+                }}>
+                  <Clock size={28} color="#f87171" style={{ margin: '0 auto 6px' }} />
+                  <h4 style={{ margin: '0 0 4px', color: '#ffffff', fontSize: 14, fontWeight: 800 }}>
+                    انتهت صلاحية الكود المؤقت (5 دقائق)
+                  </h4>
+                  <p style={{ margin: 0, color: '#fca5a5', fontSize: 11.5 }}>
+                    اضغط بالأسفل لتوليد كود جديد في ثوانٍ.
+                  </p>
+                </div>
+              );
+            })()}
+
+            {/* Security Guarantee Note */}
+            <div style={{
+              background: 'rgba(255, 255, 255, 0.04)',
+              border: '1px solid rgba(255, 255, 255, 0.08)',
+              borderRadius: 12,
+              padding: '10px 12px',
+              marginBottom: 16,
+              textAlign: 'right',
+              fontSize: 11,
+              color: '#cbd5e1',
+              lineHeight: 1.5
+            }}>
+              🛡️ <strong>حماية 100%:</strong> الكود يُحرق فورياً لمرة واحدة فقط. لا يستطيع أي موظف السحب من رصيدك إلا بإعطائه هذا الرمز شخصياً.
+            </div>
+
+            {/* Actions */}
+            <div style={{ display: 'flex', gap: 10 }}>
+              <Button
+                variant="ghost"
+                onClick={() => setShowOtpModal(false)}
+                style={{ flex: 1, padding: 10 }}
+              >
+                إغلاق ✕
+              </Button>
+              <Button
+                variant="primary"
+                onClick={handleGenerateOtp}
+                disabled={generatingOtp}
+                style={{
+                  flex: 2,
+                  padding: 10,
+                  fontWeight: 800,
+                  background: 'linear-gradient(135deg, #7e22ce, #9333ea)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: 6
+                }}
+              >
+                <RotateCw size={14} className={generatingOtp ? 'spin' : ''} />
+                <span>توليد كود جديد ⚡</span>
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
 
 
     </div>

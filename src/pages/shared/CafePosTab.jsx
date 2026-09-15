@@ -3,7 +3,8 @@ import {
   getActiveCafeShift, openCafeShift, closeCafeShift,
   addCafeSale, addCafeExpense, getInventory, addCafeCashDrop, addInventoryItem,
   watchPendingCafeOrders, updateCafeOrderStatus, fulfillCafeOrder, getEmployees,
-  addEmployee, cancelCafeOrderWithRefund, chargeClientWallet, topUpClientWallet, getClients
+  addEmployee, cancelCafeOrderWithRefund, chargeClientWallet, topUpClientWallet, getClients,
+  verifyAndConsumeClientWalletOtp
 } from '../../services/db';
 import { Card, StatCard, EmptyState, Button, Input, Select, Modal, Badge } from '../../components/ui';
 import { formatCurrency, formatDateTime, formatTime } from '../../utils/constants';
@@ -11,6 +12,7 @@ import CafeShiftDetailModal from '../../components/CafeShiftDetailModal';
 import CafeReceiptModal from '../../components/CafeReceiptModal';
 import CafeWasteModal from '../../components/CafeWasteModal';
 import MenuQrModal from '../../components/MenuQrModal';
+import WalletOtpModal from '../../components/WalletOtpModal';
 import { getDrinkImage, getDrinkFallbackEmoji } from '../../utils/drinkImages';
 import { playCafeOrderChime } from '../../utils/audioAlert';
 import { useAuth } from '../../contexts/AuthContext';
@@ -43,6 +45,8 @@ export default function CafePosTab({ initialSubTab = 'pos' } = {}) {
   const [clients, setClients] = useState([]);
   const [walletSearch, setWalletSearch] = useState('');
   const [selectedWalletClient, setSelectedWalletClient] = useState(null);
+  const [walletOtpModalOpen, setWalletOtpModalOpen] = useState(false);
+  const [walletOtpSubmitting, setWalletOtpSubmitting] = useState(false);
 
   const [posSearch, setPosSearch] = useState('');
   const [posCategory, setPosCategory] = useState('all');
@@ -243,32 +247,23 @@ export default function CafePosTab({ initialSubTab = 'pos' } = {}) {
       if (clientBal < finalCartTotal) {
         return alert(`عذراً، رصيد محفظة المشترك (${selectedWalletClient.name}) لا يكفي.\nالرصيد المتاح: ${formatCurrency(clientBal)}\nوالمطلوب: ${formatCurrency(finalCartTotal)}`);
       }
+      // SECURITY: Require one-time OTP from client portal before debiting
+      setWalletOtpModalOpen(true);
+      return;
     }
 
     setSaleLoading(true);
-    let walletTxId = null;
     try {
-      if (isWallet && selectedWalletClient) {
-        const chargeRes = await chargeClientWallet({
-          clientId: selectedWalletClient.id,
-          amount: finalCartTotal,
-          description: `مبيعات كافيه بالصالة (${cart.map(c => c.name).join('، ')})`,
-          source: 'cafe_pos',
-          actorName: user?.name || baristaNameInput || 'كاشير الكافيه'
-        });
-        walletTxId = chargeRes.id;
-      }
-
-      const cleanBuyer = (isWallet && selectedWalletClient ? selectedWalletClient.name : buyerName).trim();
+      const cleanBuyer = buyerName.trim();
       const completedSale = await addCafeSale(activeShift.id, {
         items: cart,
         total: finalCartTotal,
         discount: Number(discountAmount) || 0,
         paymentMethod,
-        paidWithWallet: isWallet,
-        clientId: isWallet && selectedWalletClient ? selectedWalletClient.id : null,
-        walletTxId,
-        buyerName: cleanBuyer ? (isWallet && !cleanBuyer.includes('محفظة') ? `${cleanBuyer} [مدفوع بالمحفظة]` : cleanBuyer) : (isWallet ? 'مشترك بالمحفظة' : 'زبون كافيه')
+        paidWithWallet: false,
+        clientId: null,
+        walletTxId: null,
+        buyerName: cleanBuyer || 'زبون كافيه'
       });
 
       setCart([]);
@@ -277,6 +272,47 @@ export default function CafePosTab({ initialSubTab = 'pos' } = {}) {
       setWalletSearch('');
       setDiscountAmount('0');
       setLastSaleReceipt(completedSale);
+    } catch (err) {
+      alert('حدث خطأ: ' + err.message);
+    } finally {
+      setSaleLoading(false);
+    }
+  };
+
+  const handleWalletOtpConfirm = async (otpCode) => {
+    if (!selectedWalletClient || !activeShift) return;
+    setWalletOtpSubmitting(true);
+    let walletTxId = null;
+    try {
+      const chargeRes = await verifyAndConsumeClientWalletOtp({
+        clientId: selectedWalletClient.id,
+        inputOtp: otpCode,
+        amount: finalCartTotal,
+        description: `مبيعات كافيه بالصالة (${cart.map(c => c.name).join('، ')})`,
+        source: 'cafe_pos',
+        actorName: user?.name || baristaNameInput || 'كاشير الكافيه'
+      });
+      walletTxId = chargeRes.id;
+
+      const cleanBuyer = selectedWalletClient.name.trim();
+      const completedSale = await addCafeSale(activeShift.id, {
+        items: cart,
+        total: finalCartTotal,
+        discount: Number(discountAmount) || 0,
+        paymentMethod: 'wallet_credit',
+        paidWithWallet: true,
+        clientId: selectedWalletClient.id,
+        walletTxId,
+        buyerName: `${cleanBuyer} [مدفوع بالمحفظة (OTP)]`
+      });
+
+      setCart([]);
+      setBuyerName('');
+      setSelectedWalletClient(null);
+      setWalletSearch('');
+      setDiscountAmount('0');
+      setLastSaleReceipt(completedSale);
+      setWalletOtpModalOpen(false);
     } catch (err) {
       // Compensating transaction: rollback wallet charge if recording sale fails
       if (walletTxId && selectedWalletClient?.id) {
@@ -295,9 +331,9 @@ export default function CafePosTab({ initialSubTab = 'pos' } = {}) {
           console.error('Critical rollback error in CafePosTab:', rbErr);
         }
       }
-      alert('حدث خطأ: ' + err.message);
+      throw err;
     } finally {
-      setSaleLoading(false);
+      setWalletOtpSubmitting(false);
     }
   };
 
@@ -1024,6 +1060,21 @@ export default function CafePosTab({ initialSubTab = 'pos' } = {}) {
                             {formatCurrency((Number(selectedWalletClient.walletBalance) || 0) - finalCartTotal)}
                           </strong>
                         </div>
+                        <div style={{
+                          marginTop: 8,
+                          padding: '6px 10px',
+                          borderRadius: 8,
+                          background: 'rgba(168, 85, 247, 0.15)',
+                          border: '1px solid rgba(168, 85, 247, 0.3)',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: 6,
+                          fontSize: 11,
+                          color: '#e9d5ff'
+                        }}>
+                          <ShieldCheck size={14} color="#c084fc" />
+                          <span>يتطلب كود أمان مؤقت (OTP) من هاتف العميل لتأكيد الخصم</span>
+                        </div>
                       </div>
                     )}
                   </div>
@@ -1702,6 +1753,16 @@ export default function CafePosTab({ initialSubTab = 'pos' } = {}) {
 
       {/* QR Table Stand Modal */}
       <MenuQrModal isOpen={qrModalOpen} onClose={() => setQrModalOpen(false)} />
+
+      {/* Client Wallet Security OTP Modal */}
+      <WalletOtpModal
+        isOpen={walletOtpModalOpen}
+        onClose={() => setWalletOtpModalOpen(false)}
+        client={selectedWalletClient}
+        amount={finalCartTotal}
+        onConfirm={handleWalletOtpConfirm}
+        loading={walletOtpSubmitting}
+      />
 
       <style>{`
         @media (max-width: 1024px) {

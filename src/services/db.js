@@ -6034,6 +6034,146 @@ export const chargeClientWallet = async ({
   return { id: txRef.id, balanceAfter: result.balanceAfter, balanceBefore: result.balanceBefore };
 };
 
+// ==========================================
+// CLIENT WALLET TEMPORARY OTP (كود أمان الدفع المؤقت)
+// ==========================================
+
+export const generateClientWalletOtp = async (clientId) => {
+  if (!clientId) throw new Error('رقم العضو غير محدد');
+  const clientRef = doc(db, 'clients', clientId);
+  const clientSnap = await getDoc(clientRef);
+  if (!clientSnap.exists()) throw new Error('المشترك غير موجود في النظام');
+
+  const client = clientSnap.data();
+  // Generate cryptographically secure 4-digit code
+  const code = Math.floor(1000 + Math.random() * 9000).toString();
+  const validityMs = 5 * 60 * 1000; // 5 minutes
+  const expiresAt = Date.now() + validityMs;
+
+  const otpData = {
+    code,
+    expiresAt,
+    used: false,
+    createdAt: new Date().toISOString()
+  };
+
+  await updateDoc(clientRef, {
+    activeWalletOtp: otpData,
+    updatedAt: serverTimestamp()
+  });
+
+  await logActivity({
+    action: 'WALLET_OTP_GENERATED',
+    category: 'security',
+    details: `توليد كود أمان مؤقت لدفع الكافيه للمشترك (${client.name || clientId}) - صالح لمدة 5 دقائق`,
+    actorName: client.name || 'المشترك'
+  });
+
+  return otpData;
+};
+
+export const verifyAndConsumeClientWalletOtp = async ({
+  clientId,
+  inputOtp,
+  amount,
+  description = 'طلب كافيه',
+  referenceId = null,
+  source = 'cafe_pos',
+  actorName = 'كاشير الكافيه'
+}) => {
+  const chargeAmount = roundCurrency(amount);
+  if (chargeAmount <= 0) {
+    throw new Error('مبلغ الخصم يجب أن يكون أكبر من الصفر');
+  }
+  if (!clientId) {
+    throw new Error('رقم المشترك غير محدد لإتمام الخصم');
+  }
+  const cleanOtp = String(inputOtp || '').trim();
+  if (!cleanOtp) {
+    throw new Error('يرجى إدخال كود الأمان المؤقت (4 أرقام)');
+  }
+
+  const clientRef = doc(db, 'clients', clientId);
+  const txRef = doc(collection(db, 'wallet_transactions'));
+
+  const result = await runTransaction(db, async (transaction) => {
+    const clientSnap = await transaction.get(clientRef);
+    if (!clientSnap.exists()) {
+      throw new Error('لم يتم العثور على بيانات المشترك في النظام');
+    }
+
+    const client = clientSnap.data();
+    const otp = client.activeWalletOtp;
+
+    if (!otp || !otp.code) {
+      throw new Error('لا يوجد كود أمان مؤقت مفعّل لهذا المشترك. يرجى من العميل فتح بوابته والضغط على "توليد كود دفع جديد".');
+    }
+
+    if (otp.used) {
+      throw new Error('تم استخدام هذا الكود المؤقت مسبقاً! الأكواد صالحة لمرة واحدة فقط. يرجى من العميل توليد كود جديد من بوابته.');
+    }
+
+    if (Date.now() > Number(otp.expiresAt || 0)) {
+      throw new Error('انتهت صلاحية كود الأمان المؤقت (المهلة 5 دقائق)! يرجى من العميل توليد كود جديد من بوابته.');
+    }
+
+    if (String(otp.code).trim() !== cleanOtp) {
+      throw new Error('كود الأمان المؤقت غير صحيح! يرجى مراجعة الكود المكون من 4 أرقام الظاهر على شاشة العميل.');
+    }
+
+    const currentBalance = roundCurrency(client.walletBalance || 0);
+    if (currentBalance < chargeAmount) {
+      throw new Error(`عذراً، رصيد المحفظة لا يكفي. الرصيد المتاح: ${currentBalance} ج.م، والمطلوب: ${chargeAmount} ج.م`);
+    }
+
+    const balanceAfter = roundCurrency(currentBalance - chargeAmount);
+
+    // Invalidate OTP atomically and deduct balance
+    transaction.update(clientRef, {
+      walletBalance: balanceAfter,
+      'activeWalletOtp.used': true,
+      'activeWalletOtp.consumedAt': new Date().toISOString(),
+      'activeWalletOtp.consumedForAmount': chargeAmount,
+      updatedAt: serverTimestamp()
+    });
+
+    transaction.set(txRef, {
+      clientId,
+      clientName: client.name || '',
+      clientPhone: client.phone || '',
+      memberId: client.memberId || '',
+      amount: -chargeAmount,
+      balanceBefore: currentBalance,
+      balanceAfter,
+      type: 'charge',
+      description: `${description} [بتفويض كود أمان مؤقت]`,
+      referenceId: referenceId || null,
+      source,
+      actorName: actorName || 'كاشير الكافيه',
+      isoDate: new Date().toISOString(),
+      createdAt: serverTimestamp()
+    });
+
+    return {
+      clientName: client.name || '',
+      clientPhone: client.phone || '',
+      memberId: client.memberId || '',
+      balanceBefore: currentBalance,
+      balanceAfter
+    };
+  });
+
+  await logActivity({
+    action: 'WALLET_CHARGE_OTP',
+    category: 'finances',
+    details: `خصم من محفظة العضو (${result.clientName}) بمبلغ ${chargeAmount} ج.م عبر كود أمان مؤقت (${description}) - المتبقي: ${result.balanceAfter} ج.م`,
+    actorName
+  });
+
+  return { id: txRef.id, balanceAfter: result.balanceAfter, balanceBefore: result.balanceBefore };
+};
+
+
 export const getClientWalletTransactions = (clientId, callback) => {
   const q = query(
     collection(db, 'wallet_transactions'),
