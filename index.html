@@ -13,7 +13,8 @@
     <meta http-equiv="Expires" content="0" />
     <script>
       (function() {
-        var APP_BUILD_VER = 'tfg_build_v20260913_rev51';
+        var APP_BUILD_VER = 'tfg_build_v20260913_rev52';
+        localStorage.removeItem('tfg_theme');
         var stored = localStorage.getItem('tfg_app_version');
         if (stored && stored !== APP_BUILD_VER) {
           localStorage.setItem('tfg_app_version', APP_BUILD_VER);
