@@ -99,17 +99,40 @@ export default function ClientPortalPage() {
       const remaining = Math.max(0, Math.floor((Number(client.activeWalletOtp.expiresAt) - Date.now()) / 1000));
       setOtpCountdown(remaining);
     };
-
     updateTime();
     const interval = setInterval(updateTime, 1000);
     return () => clearInterval(interval);
   }, [showOtpModal, client?.activeWalletOtp?.expiresAt]);
 
+  // Force OTP Modal to pop up immediately on client's screen when requested by barista (بشكل إجباري)
+  useEffect(() => {
+    const otp = client?.activeWalletOtp;
+    if (!otp) return;
+
+    const isNotUsed = !otp.used;
+    const isNotExpired = Date.now() < Number(otp.expiresAt || 0);
+
+    if (isNotUsed && isNotExpired) {
+      setShowOtpModal(true);
+      try {
+        if (navigator.vibrate) navigator.vibrate([200, 100, 200, 100, 300]);
+      } catch (_) {}
+    } else if (otp.used) {
+      // If modal is currently open when barista consumes it, keep success message visible for 3.5 seconds then close
+      if (showOtpModal) {
+        const timer = setTimeout(() => {
+          setShowOtpModal(false);
+        }, 3500);
+        return () => clearTimeout(timer);
+      }
+    }
+  }, [client?.activeWalletOtp?.reqTimestamp, client?.activeWalletOtp?.code, client?.activeWalletOtp?.used]);
+
   const handleGenerateOtp = async () => {
     if (!client?.id || generatingOtp) return;
     setGeneratingOtp(true);
     try {
-      await generateClientWalletOtp(client.id);
+      await generateClientWalletOtp(client.id, 0, client.name || 'المشترك');
     } catch (err) {
       alert('حدث خطأ أثناء توليد الكود: ' + err.message);
     } finally {
@@ -1975,6 +1998,20 @@ export default function ClientPortalPage() {
 
                 return (
                   <div>
+                    {Number(otp.requestedAmount) > 0 && (
+                      <div style={{
+                        background: 'rgba(245, 158, 11, 0.15)',
+                        border: '1px solid rgba(245, 158, 11, 0.4)',
+                        borderRadius: 12,
+                        padding: '8px 14px',
+                        marginBottom: 14,
+                        color: '#fcd34d',
+                        fontSize: 13,
+                        fontWeight: 900
+                      }}>
+                        طلب خصم من كافيه TFG بقيمة: <strong style={{ color: '#ffffff' }}>{formatCurrency(otp.requestedAmount)}</strong>
+                      </div>
+                    )}
                     {/* Digits Display */}
                     <div style={{
                       display: 'flex',

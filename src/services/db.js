@@ -6038,7 +6038,7 @@ export const chargeClientWallet = async ({
 // CLIENT WALLET TEMPORARY OTP (كود أمان الدفع المؤقت)
 // ==========================================
 
-export const generateClientWalletOtp = async (clientId) => {
+export const generateClientWalletOtp = async (clientId, requestedAmount = 0, requestedBy = 'كاشير الكافيه') => {
   if (!clientId) throw new Error('رقم العضو غير محدد');
   const clientRef = doc(db, 'clients', clientId);
   const clientSnap = await getDoc(clientRef);
@@ -6054,6 +6054,9 @@ export const generateClientWalletOtp = async (clientId) => {
     code,
     expiresAt,
     used: false,
+    requestedAmount: Number(requestedAmount) || 0,
+    requestedBy: requestedBy || 'كاشير الكافيه',
+    reqTimestamp: Date.now(),
     createdAt: new Date().toISOString()
   };
 
@@ -6065,8 +6068,8 @@ export const generateClientWalletOtp = async (clientId) => {
   await logActivity({
     action: 'WALLET_OTP_GENERATED',
     category: 'security',
-    details: `توليد كود أمان مؤقت لدفع الكافيه للمشترك (${client.name || clientId}) - صالح لمدة 5 دقائق`,
-    actorName: client.name || 'المشترك'
+    details: `طلب كود أمان مؤقت لدفع الكافيه للمشترك (${client.name || clientId}) بقيمة ${requestedAmount} ج.م - صالح لمدة 5 دقائق`,
+    actorName: requestedBy || client.name || 'المشترك'
   });
 
   return otpData;

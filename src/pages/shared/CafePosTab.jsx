@@ -4,7 +4,7 @@ import {
   addCafeSale, addCafeExpense, getInventory, addCafeCashDrop, addInventoryItem,
   watchPendingCafeOrders, updateCafeOrderStatus, fulfillCafeOrder, getEmployees,
   addEmployee, cancelCafeOrderWithRefund, chargeClientWallet, topUpClientWallet, getClients,
-  verifyAndConsumeClientWalletOtp
+  verifyAndConsumeClientWalletOtp, generateClientWalletOtp
 } from '../../services/db';
 import { Card, StatCard, EmptyState, Button, Input, Select, Modal, Badge } from '../../components/ui';
 import { formatCurrency, formatDateTime, formatTime } from '../../utils/constants';
@@ -347,6 +347,37 @@ export default function CafePosTab({ initialSubTab = 'pos' } = {}) {
     } finally {
       setSaleLoading(false);
       setWalletOtpSubmitting(false);
+    }
+  };
+
+  const [sendingOtpPrompt, setSendingOtpPrompt] = useState(false);
+
+  const handleSelectWalletClient = async (client) => {
+    setSelectedWalletClient(client);
+    setBuyerName(client.name);
+    setWalletSearch('');
+    setWalletOtpInput('');
+    setOtpInputError('');
+    setSendingOtpPrompt(true);
+    try {
+      await generateClientWalletOtp(client.id, finalCartTotal, user?.name || baristaNameInput || 'كاشير الكافيه');
+    } catch (err) {
+      console.error('Failed to auto-generate OTP on selection:', err);
+    } finally {
+      setSendingOtpPrompt(false);
+    }
+  };
+
+  const retriggerClientOtp = async () => {
+    if (!selectedWalletClient?.id || sendingOtpPrompt) return;
+    setSendingOtpPrompt(true);
+    setOtpInputError('');
+    try {
+      await generateClientWalletOtp(selectedWalletClient.id, finalCartTotal, user?.name || baristaNameInput || 'كاشير الكافيه');
+    } catch (err) {
+      setOtpInputError('تعذر إرسال الكود: ' + err.message);
+    } finally {
+      setSendingOtpPrompt(false);
     }
   };
 
@@ -1007,11 +1038,7 @@ export default function CafePosTab({ initialSubTab = 'pos' } = {}) {
                                   <button
                                     key={c.id}
                                     type="button"
-                                    onClick={() => {
-                                      setSelectedWalletClient(c);
-                                      setBuyerName(c.name);
-                                      setWalletSearch('');
-                                    }}
+                                    onClick={() => handleSelectWalletClient(c)}
                                     style={{
                                       padding: '8px 10px',
                                       border: 'none',
@@ -1084,10 +1111,47 @@ export default function CafePosTab({ initialSubTab = 'pos' } = {}) {
                           flexDirection: 'column',
                           gap: 6
                         }}>
-                          <label style={{ color: '#d8b4fe', fontSize: 12, fontWeight: 800, display: 'flex', alignItems: 'center', gap: 6 }}>
-                            <Lock size={14} color="#c084fc" />
-                            <span>كود الأمان المؤقت (4 أرقام من هاتف المشترك):</span>
-                          </label>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <label style={{ color: '#d8b4fe', fontSize: 12, fontWeight: 800, display: 'flex', alignItems: 'center', gap: 6 }}>
+                              <Lock size={14} color="#c084fc" />
+                              <span>كود الأمان المؤقت (4 أرقام من هاتف المشترك):</span>
+                            </label>
+                            <button
+                              type="button"
+                              onClick={retriggerClientOtp}
+                              disabled={sendingOtpPrompt}
+                              style={{
+                                background: 'transparent',
+                                border: 'none',
+                                color: '#38bdf8',
+                                fontSize: 11,
+                                fontWeight: 700,
+                                cursor: 'pointer',
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: 4
+                              }}
+                            >
+                              <span>{sendingOtpPrompt ? 'جارٍ الإرسال...' : '🔄 إعادة إظهار الكود'}</span>
+                            </button>
+                          </div>
+
+                          <div style={{
+                            background: 'rgba(16, 185, 129, 0.12)',
+                            border: '1px solid rgba(16, 185, 129, 0.25)',
+                            borderRadius: 6,
+                            padding: '4px 8px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: 6,
+                            fontSize: 11,
+                            color: '#34d399',
+                            fontWeight: 700
+                          }}>
+                            <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#34d399', display: 'inline-block', boxShadow: '0 0 6px #34d399' }} />
+                            <span>يظهر الكود الآن إجبارياً على شاشة هاتف العميل تلقائياً!</span>
+                          </div>
+
                           <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
                             <input
                               type="text"
@@ -1129,7 +1193,7 @@ export default function CafePosTab({ initialSubTab = 'pos' } = {}) {
                             </span>
                           ) : (
                             <span style={{ color: '#94a3b8', fontSize: 10.5 }}>
-                              اطلب من المشترك فتح بوابته والضغط على «كود دفع الكافيه» لإعطائك الكود.
+                              اطلب من المشترك قراءة الـ 4 أرقام الظاهرة على شاشة هاتفه الآن واكتبها هنا.
                             </span>
                           )}
                         </div>
