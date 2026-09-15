@@ -197,14 +197,14 @@ export default function OccupancyMeterWidget({
         <div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
             <span style={{ fontSize: 20 }}>🚦</span>
-            <h3 style={{ margin: 0, color: 'var(--text-primary)', fontWeight: 900, fontSize: 17 }}>
+            <h3 style={{ margin: 0, color: '#ffffff', fontWeight: 900, fontSize: 17 }}>
               رادار وعداد الإشغال اللحظي الشامل (مساحة العمل + الكورسات)
             </h3>
             <Badge color={occupancyPercent > 75 ? 'red' : occupancyPercent > 35 ? 'amber' : 'green'}>
               {statusText}
             </Badge>
           </div>
-          <p style={{ margin: '4px 0 0', color: 'var(--text-secondary)', fontSize: 12 }}>
+          <p style={{ margin: '4px 0 0', color: '#93c5fd', fontSize: 12 }}>
             حصر حي فوري لكافة الطلاب والمشتركين المتواجدين داخل السنتر بالقاعات ومساحات العمل
           </p>
         </div>
@@ -214,7 +214,7 @@ export default function OccupancyMeterWidget({
             size="sm"
             variant="ghost"
             onClick={() => setShowActiveDetails(!showActiveDetails)}
-            style={{ background: 'rgba(27, 77, 62, 0.12)', border: '1px solid rgba(27, 77, 62, 0.3)', color: 'var(--accent)' }}
+            style={{ background: 'rgba(59, 130, 246, 0.15)', border: '1px solid rgba(59, 130, 246, 0.3)', color: '#93c5fd' }}
           >
             {showActiveDetails ? 'إخفاء القائمة ⬆️' : `👥 المتواجدون الآن (${activeCount})`}
           </Button>
@@ -223,36 +223,36 @@ export default function OccupancyMeterWidget({
 
       {/* Metrics Row */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(170px, 1fr))', gap: 12, marginBottom: 16 }}>
-        <div style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border)', borderRadius: 14, padding: '12px 16px', textAlign: 'center' }}>
-          <span style={{ color: 'var(--text-muted)', fontSize: 12, display: 'block' }}>إجمالي المتواجدين بالداخل</span>
+        <div style={{ background: 'rgba(15, 23, 42, 0.75)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 14, padding: '12px 16px', textAlign: 'center' }}>
+          <span style={{ color: '#94a3b8', fontSize: 12, display: 'block' }}>إجمالي المتواجدين بالداخل</span>
           <strong className="tabular-nums" style={{ color: statusColor, fontSize: 26, fontWeight: 900 }}>
             <AnimatedCounter value={activeCount} />
           </strong>
-          <span style={{ fontSize: 11, color: 'var(--text-muted)', display: 'block' }}>شخص في السنتر</span>
+          <span style={{ fontSize: 11, color: '#64748b', display: 'block' }}>شخص في السنتر</span>
         </div>
 
-        <div style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border)', borderRadius: 14, padding: '12px 16px', textAlign: 'center' }}>
-          <span style={{ color: 'var(--text-muted)', fontSize: 12, display: 'block' }}>🏢 رواد مساحة العمل</span>
-          <strong className="tabular-nums" style={{ color: '#9333ea', fontSize: 26, fontWeight: 900 }}>
+        <div style={{ background: 'rgba(15, 23, 42, 0.75)', border: '1px solid rgba(147, 51, 234, 0.3)', borderRadius: 14, padding: '12px 16px', textAlign: 'center' }}>
+          <span style={{ color: '#c084fc', fontSize: 12, display: 'block' }}>🏢 رواد مساحة العمل</span>
+          <strong className="tabular-nums" style={{ color: '#d8b4fe', fontSize: 26, fontWeight: 900 }}>
             <AnimatedCounter value={workspaceCount} />
           </strong>
-          <span style={{ fontSize: 11, color: 'var(--text-muted)', display: 'block' }}>مشترك بالساعات</span>
+          <span style={{ fontSize: 11, color: '#94a3b8', display: 'block' }}>مشترك بالساعات</span>
         </div>
 
-        <div style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border)', borderRadius: 14, padding: '12px 16px', textAlign: 'center' }}>
-          <span style={{ color: 'var(--text-muted)', fontSize: 12, display: 'block' }}>📚 طلاب الكورسات والمحاضرات</span>
-          <strong className="tabular-nums" style={{ color: 'var(--accent)', fontSize: 26, fontWeight: 900 }}>
+        <div style={{ background: 'rgba(15, 23, 42, 0.75)', border: '1px solid rgba(59, 130, 246, 0.3)', borderRadius: 14, padding: '12px 16px', textAlign: 'center' }}>
+          <span style={{ color: '#93c5fd', fontSize: 12, display: 'block' }}>📚 طلاب الكورسات والمحاضرات</span>
+          <strong className="tabular-nums" style={{ color: '#60a5fa', fontSize: 26, fontWeight: 900 }}>
             <AnimatedCounter value={courseCount} />
           </strong>
-          <span style={{ fontSize: 11, color: 'var(--text-muted)', display: 'block' }}>طالب في القاعات</span>
+          <span style={{ fontSize: 11, color: '#94a3b8', display: 'block' }}>طالب في القاعات</span>
         </div>
 
-        <div style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border)', borderRadius: 14, padding: '12px 16px', textAlign: 'center' }}>
-          <span style={{ color: 'var(--text-muted)', fontSize: 12, display: 'block' }}>المقاعد المتاحة والشاغرة</span>
-          <strong className="tabular-nums" style={{ color: '#059669', fontSize: 26, fontWeight: 900 }}>
+        <div style={{ background: 'rgba(15, 23, 42, 0.75)', border: '1px solid rgba(16, 185, 129, 0.3)', borderRadius: 14, padding: '12px 16px', textAlign: 'center' }}>
+          <span style={{ color: '#a7f3d0', fontSize: 12, display: 'block' }}>المقاعد المتاحة والشاغرة</span>
+          <strong className="tabular-nums" style={{ color: '#34d399', fontSize: 26, fontWeight: 900 }}>
             <AnimatedCounter value={availableSeats} />
           </strong>
-          <span style={{ fontSize: 11, color: 'var(--text-muted)', display: 'block' }}>من سعة {capacity} مقعد</span>
+          <span style={{ fontSize: 11, color: '#64748b', display: 'block' }}>من سعة {capacity} مقعد</span>
         </div>
       </div>
 

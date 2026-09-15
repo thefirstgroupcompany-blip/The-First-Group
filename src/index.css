@@ -1,65 +1,66 @@
 
 /* ========================================================
-   THEME ENGINE: SCANDINAVIAN LUXURY (DEFAULT) & BENTO DARK
-   Direction 1: WeWork & Spaces Inspired Warm Hospitality
-   Direction 4: Apple-Style Bento Grid Midnight Luxury
+   UNIVERSAL DARK CONTROLS & DROPDOWN COLOR-SCHEME (FIX FOR WHITE MENUS)
    ======================================================== */
-
-/* 1. SCANDINAVIAN LUXURY & WARM HOSPITALITY (DEFAULT) */
-:root,
-html:not([data-theme="bento-dark"]),
-body:not([data-theme="bento-dark"]),
-html[data-theme="scandinavian"],
-body[data-theme="scandinavian"] {
-  color-scheme: light !important;
-  --theme-name: 'scandinavian';
-  --bg-base:        #F8F6F0;
-  --bg-surface:     #FFFFFF;
-  --bg-card:        #FFFFFF;
-  --bg-elevated:    #FAF8F5;
-  --bg-active:      #EDE8DF;
-  --border:         rgba(217, 210, 198, 0.85);
-  --border-glow:    rgba(27, 77, 62, 0.25);
-  --accent:         #1B4D3E; /* Rich Nordic Botanical Forest Pine */
-  --accent-light:   #2D735F;
-  --accent-glow:    rgba(27, 77, 62, 0.18);
-  --text-primary:   #1C1917; /* Deep Espresso Charcoal */
-  --text-secondary: #57534E; /* Stone 600 */
-  --text-muted:     #78716C; /* Stone 500 */
-  --success:        #059669;
-  --danger:         #DC2626;
-  --warning:        #D97706;
+:root, html, body {
+  color-scheme: dark !important;
 }
 
-/* 2. BENTO MIDNIGHT LUXURY (DARK) */
-html[data-theme="bento-dark"],
-body[data-theme="bento-dark"] {
+select, option, optgroup, input, textarea {
   color-scheme: dark !important;
-  --theme-name: 'bento-dark';
-  --bg-base:        #0C1A2E;
-  --bg-surface:     rgba(10, 22, 43, 0.72);
-  --bg-card:        rgba(12, 26, 51, 0.65);
-  --bg-elevated:    rgba(17, 35, 68, 0.75);
-  --bg-active:      rgba(26, 56, 109, 0.85);
-  --border:         rgba(59, 130, 246, 0.14);
-  --border-glow:    rgba(56, 189, 248, 0.35);
-  --accent:         #38bdf8;
-  --accent-light:   #93c5fd;
-  --accent-glow:    rgba(56, 189, 248, 0.25);
-  --text-primary:   #ffffff;
-  --text-secondary: #c8dcf5;
-  --text-muted:     #7e9ac0;
-  --success:        #10b981;
-  --danger:         #ef4444;
-  --warning:        #f59e0b;
+}
+
+select, .dark-select {
+  background-color: #0b172d !important;
+  color: #ffffff !important;
+  border: 1px solid rgba(59, 130, 246, 0.3) !important;
+}
+
+select option, .dark-select option {
+  background-color: #0b172d !important;
+  color: #ffffff !important;
+  font-size: 14px !important;
+  padding: 12px 14px !important;
+}
+
+select option:checked, .dark-select option:checked {
+  background-color: #1d4ed8 !important;
+  color: #ffffff !important;
+}
+
+select option:hover, .dark-select option:hover {
+  background-color: #2563eb !important;
+  color: #ffffff !important;
 }
 
 @import "tailwindcss";
 
 @theme {
-  --color-primary: var(--accent);
-  --color-primary-dark: #11382C;
-  --color-primary-light: var(--accent-light);
+  --color-primary: #3b82f6;
+  --color-primary-dark: #1d4ed8;
+  --color-primary-light: #60a5fa;
+}
+
+/* ============================
+   SEAMLESS LUXURY MIDNIGHT PALETTE
+   ============================ */
+:root {
+  --bg-base:      transparent;
+  --bg-surface:   rgba(10, 22, 43, 0.72);
+  --bg-card:      rgba(12, 26, 51, 0.65);
+  --bg-elevated:  rgba(17, 35, 68, 0.75);
+  --bg-active:    rgba(26, 56, 109, 0.85);
+  --border:       rgba(59, 130, 246, 0.14);
+  --border-glow:  rgba(56, 189, 248, 0.35);
+  --accent:       #38bdf8;
+  --accent-light: #93c5fd;
+  --accent-glow:  rgba(56, 189, 248, 0.25);
+  --text-primary:   #ffffff;
+  --text-secondary: #c8dcf5;
+  --text-muted:     #7e9ac0;
+  --success:      #10b981;
+  --danger:       #ef4444;
+  --warning:      #f59e0b;
 }
 
 * {
@@ -78,6 +79,7 @@ body[data-theme="bento-dark"] {
 html, body {
   direction: rtl;
   font-family: 'Cairo', 'Segoe UI', sans-serif;
+  background-color: #0C1A2E !important;
   color: var(--text-primary);
   min-height: 100vh;
   min-height: 100dvh;
@@ -87,40 +89,9 @@ html, body {
   text-size-adjust: 100%;
   -webkit-tap-highlight-color: transparent;
   position: relative;
-  transition: background-color 0.25s ease, color 0.25s ease;
 }
 
-/* Scandinavian Luxury Body Background (Warm WeWork / Spaces Lounge) */
-body:not([data-theme="bento-dark"]),
-body[data-theme="scandinavian"] {
-  background-color: #F8F6F0 !important;
-  color: #1C1917 !important;
-}
-
-body:not([data-theme="bento-dark"])::before,
-body[data-theme="scandinavian"]::before {
-  content: '';
-  position: fixed;
-  inset: 0;
-  z-index: -1;
-  pointer-events: none;
-  background-color: #F8F6F0;
-  background-image: 
-    radial-gradient(ellipse 80% 50% at 15% 10%, rgba(217, 119, 6, 0.045) 0%, transparent 50%),
-    radial-gradient(ellipse 70% 50% at 85% 20%, rgba(27, 77, 62, 0.055) 0%, transparent 50%),
-    radial-gradient(ellipse 65% 55% at 50% 85%, rgba(180, 83, 9, 0.035) 0%, transparent 60%),
-    linear-gradient(180deg, #FAF8F4 0%, #F3EFE6 100%);
-  background-size: cover;
-  transform: translateZ(0);
-}
-
-/* Bento Dark Body Background */
-body[data-theme="bento-dark"] {
-  background-color: #0C1A2E !important;
-  color: #ffffff !important;
-}
-
-body[data-theme="bento-dark"]::before {
+body::before {
   content: '';
   position: fixed;
   inset: 0;
@@ -1356,10 +1327,26 @@ button:active:not(:disabled), .btn:active:not(:disabled) {
 }
 
 /* ========================================================
-   GLOBAL DESIGN SYSTEM: SCANDINAVIAN LUXURY & BENTO DARK
+   GLOBAL BENTO LUXURY DESIGN SYSTEM (ALL TABS, CARDS, FORMS)
    ======================================================== */
 
-/* 1. BUTTON MICRO-INTERACTIONS (SHARED FOR BOTH THEMES) */
+/* 1. All Cards across every tab */
+.dark-card, .glass-card, [class*="Card"] {
+  background: linear-gradient(145deg, rgba(14, 28, 54, 0.72) 0%, rgba(8, 17, 34, 0.88) 100%) !important;
+  border: 1px solid rgba(56, 189, 248, 0.18) !important;
+  border-radius: 20px !important;
+  backdrop-filter: blur(25px) !important;
+  -webkit-backdrop-filter: blur(25px) !important;
+  box-shadow: 0 16px 36px -10px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.08) !important;
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s ease, border-color 0.25s ease !important;
+}
+
+.dark-card:hover, .glass-card:hover {
+  border-color: rgba(56, 189, 248, 0.38) !important;
+  box-shadow: 0 24px 48px -12px rgba(0, 0, 0, 0.65), 0 0 25px rgba(56, 189, 248, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.14) !important;
+}
+
+/* 2. Apple-Style Micro-Interaction Buttons */
 .btn {
   display: inline-flex;
   align-items: center;
@@ -1371,7 +1358,7 @@ button:active:not(:disabled), .btn:active:not(:disabled) {
   cursor: pointer;
   transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1) !important;
   outline: none;
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
   position: relative;
   overflow: hidden;
 }
@@ -1380,324 +1367,95 @@ button:active:not(:disabled), .btn:active:not(:disabled) {
   transform: scale(0.965) !important;
 }
 
-.btn-sm { padding: 7px 14px !important; font-size: 12px !important; }
-.btn-md { padding: 10px 20px !important; font-size: 14px !important; }
-.btn-lg { padding: 14px 28px !important; font-size: 16px !important; }
-
-/* 2. SCANDINAVIAN LUXURY THEME (WEWORK / SPACES COWORKING LOUNGE) */
-body:not([data-theme="bento-dark"]) .dark-card,
-body:not([data-theme="bento-dark"]) .glass-card,
-body:not([data-theme="bento-dark"]) [class*="Card"],
-body:not([data-theme="bento-dark"]) .bento-card,
-body[data-theme="scandinavian"] .dark-card,
-body[data-theme="scandinavian"] .glass-card,
-body[data-theme="scandinavian"] [class*="Card"],
-body[data-theme="scandinavian"] .bento-card {
-  background: #FFFFFF !important;
-  border: 1px solid rgba(226, 220, 209, 0.9) !important;
-  border-radius: 20px !important;
-  box-shadow: 0 4px 20px -2px rgba(44, 39, 32, 0.05), 0 2px 6px -1px rgba(44, 39, 32, 0.03) !important;
-  color: #1C1917 !important;
-  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s ease, border-color 0.25s ease !important;
-}
-
-body:not([data-theme="bento-dark"]) .dark-card:hover,
-body:not([data-theme="bento-dark"]) .glass-card:hover,
-body:not([data-theme="bento-dark"]) .bento-card:hover,
-body[data-theme="scandinavian"] .dark-card:hover,
-body[data-theme="scandinavian"] .glass-card:hover,
-body[data-theme="scandinavian"] .bento-card:hover {
-  border-color: rgba(27, 77, 62, 0.35) !important;
-  box-shadow: 0 16px 36px -6px rgba(44, 39, 32, 0.09), 0 0 0 1px rgba(27, 77, 62, 0.15) !important;
-  transform: translateY(-3px) !important;
-}
-
-/* Scandinavian Primary: Nordic Botanical Forest Pine */
-body:not([data-theme="bento-dark"]) .btn-primary,
-body[data-theme="scandinavian"] .btn-primary {
-  background: linear-gradient(135deg, #1B4D3E 0%, #11382C 100%) !important;
-  color: #ffffff !important;
-  border: 1px solid rgba(27, 77, 62, 0.4) !important;
-  box-shadow: 0 4px 14px rgba(27, 77, 62, 0.28) !important;
-}
-body:not([data-theme="bento-dark"]) .btn-primary:hover,
-body[data-theme="scandinavian"] .btn-primary:hover {
-  background: linear-gradient(135deg, #246452 0%, #164637 100%) !important;
-  box-shadow: 0 6px 20px rgba(27, 77, 62, 0.38) !important;
-  transform: translateY(-2px);
-}
-
-/* Scandinavian Secondary: Warm Linen Sandstone */
-body:not([data-theme="bento-dark"]) .btn-secondary,
-body[data-theme="scandinavian"] .btn-secondary {
-  background: #FAF7F2 !important;
-  color: #292524 !important;
-  border: 1px solid #D6CEBE !important;
-  box-shadow: 0 2px 8px rgba(44, 39, 32, 0.04) !important;
-}
-body:not([data-theme="bento-dark"]) .btn-secondary:hover,
-body[data-theme="scandinavian"] .btn-secondary:hover {
-  background: #EFE9DE !important;
-  color: #1C1917 !important;
-  border-color: #C7BDAA !important;
-  transform: translateY(-2px);
-}
-
-/* Scandinavian Success & Danger */
-body:not([data-theme="bento-dark"]) .btn-success,
-body[data-theme="scandinavian"] .btn-success {
-  background: linear-gradient(135deg, #059669 0%, #10b981 100%) !important;
-  color: #ffffff !important;
-  border: 1px solid rgba(255, 255, 255, 0.2) !important;
-  box-shadow: 0 4px 14px rgba(16, 185, 129, 0.3) !important;
-}
-body:not([data-theme="bento-dark"]) .btn-danger,
-body[data-theme="scandinavian"] .btn-danger {
-  background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%) !important;
-  color: #ffffff !important;
-  border: 1px solid rgba(255, 255, 255, 0.2) !important;
-  box-shadow: 0 4px 14px rgba(220, 38, 38, 0.3) !important;
-}
-
-/* Scandinavian Inputs & Selects */
-body:not([data-theme="bento-dark"]) .dark-input,
-body:not([data-theme="bento-dark"]) .dark-select,
-body:not([data-theme="bento-dark"]) input[type="text"],
-body:not([data-theme="bento-dark"]) input[type="number"],
-body:not([data-theme="bento-dark"]) input[type="search"],
-body:not([data-theme="bento-dark"]) input[type="date"],
-body:not([data-theme="bento-dark"]) input[type="tel"],
-body:not([data-theme="bento-dark"]) select,
-body:not([data-theme="bento-dark"]) textarea,
-body[data-theme="scandinavian"] .dark-input,
-body[data-theme="scandinavian"] .dark-select,
-body[data-theme="scandinavian"] input[type="text"],
-body[data-theme="scandinavian"] input[type="number"],
-body[data-theme="scandinavian"] input[type="search"],
-body[data-theme="scandinavian"] input[type="date"],
-body[data-theme="scandinavian"] input[type="tel"],
-body[data-theme="scandinavian"] select,
-body[data-theme="scandinavian"] textarea {
-  background: #FFFFFF !important;
-  border: 1px solid #D7D0C3 !important;
-  border-radius: 14px !important;
-  color: #1C1917 !important;
-  padding: 10px 14px !important;
-  transition: all 0.2s ease !important;
-  font-family: 'Cairo', sans-serif !important;
-}
-
-body:not([data-theme="bento-dark"]) select option,
-body:not([data-theme="bento-dark"]) .dark-select option,
-body[data-theme="scandinavian"] select option,
-body[data-theme="scandinavian"] .dark-select option {
-  background-color: #FFFFFF !important;
-  color: #1C1917 !important;
-}
-
-body:not([data-theme="bento-dark"]) select option:checked,
-body[data-theme="scandinavian"] select option:checked {
-  background-color: #1B4D3E !important;
-  color: #ffffff !important;
-}
-
-body:not([data-theme="bento-dark"]) .dark-input:focus,
-body:not([data-theme="bento-dark"]) .dark-select:focus,
-body:not([data-theme="bento-dark"]) input:focus,
-body:not([data-theme="bento-dark"]) select:focus,
-body:not([data-theme="bento-dark"]) textarea:focus,
-body[data-theme="scandinavian"] .dark-input:focus,
-body[data-theme="scandinavian"] .dark-select:focus,
-body[data-theme="scandinavian"] input:focus,
-body[data-theme="scandinavian"] select:focus,
-body[data-theme="scandinavian"] textarea:focus {
-  border-color: #1B4D3E !important;
-  box-shadow: 0 0 0 3px rgba(27, 77, 62, 0.15) !important;
-  outline: none !important;
-}
-
-/* Scandinavian Tables */
-table {
-  border-collapse: separate !important;
-  border-spacing: 0 6px !important;
-  width: 100%;
-}
-
-body:not([data-theme="bento-dark"]) thead th,
-body[data-theme="scandinavian"] thead th {
-  background: #F3EFE6 !important;
-  color: #1C1917 !important;
-  font-weight: 800 !important;
-  padding: 12px 16px !important;
-  border-bottom: 2px solid #D5CDBD !important;
-}
-
-body:not([data-theme="bento-dark"]) tbody tr,
-body[data-theme="scandinavian"] tbody tr {
-  background: #FFFFFF !important;
-  border: 1px solid #EBE5D8 !important;
-  border-radius: 12px !important;
-  transition: all 0.18s ease !important;
-}
-
-body:not([data-theme="bento-dark"]) tbody tr:hover,
-body[data-theme="scandinavian"] tbody tr:hover {
-  background: #FBF9F4 !important;
-  box-shadow: 0 4px 12px rgba(44, 39, 32, 0.05) !important;
-}
-
-body:not([data-theme="bento-dark"]) tbody td,
-body[data-theme="scandinavian"] tbody td {
-  padding: 12px 16px !important;
-  color: #1C1917 !important;
-}
-
-/* Scandinavian Headers & Navigation */
-body:not([data-theme="bento-dark"]) header,
-body:not([data-theme="bento-dark"]) .dark-header,
-body:not([data-theme="bento-dark"]) .responsive-header,
-body[data-theme="scandinavian"] header,
-body[data-theme="scandinavian"] .dark-header,
-body[data-theme="scandinavian"] .responsive-header {
-  background: rgba(254, 253, 251, 0.97) !important;
-  border-bottom: 1px solid rgba(226, 220, 209, 0.85) !important;
-  box-shadow: 0 2px 14px rgba(44, 39, 32, 0.04) !important;
-}
-
-body:not([data-theme="bento-dark"]) .responsive-subheader,
-body[data-theme="scandinavian"] .responsive-subheader {
-  background: rgba(247, 244, 237, 0.95) !important;
-  border-bottom: 1px solid rgba(226, 220, 209, 0.75) !important;
-}
-
-body:not([data-theme="bento-dark"]) .titanium-title,
-body[data-theme="scandinavian"] .titanium-title {
-  color: #1C1917 !important;
-  background: none !important;
-  -webkit-text-fill-color: #1C1917 !important;
-}
-
-/* Scandinavian Typography */
-body:not([data-theme="bento-dark"]) h1,
-body:not([data-theme="bento-dark"]) h2,
-body:not([data-theme="bento-dark"]) h3,
-body:not([data-theme="bento-dark"]) h4,
-body:not([data-theme="bento-dark"]) h5,
-body:not([data-theme="bento-dark"]) h6,
-body[data-theme="scandinavian"] h1,
-body[data-theme="scandinavian"] h2,
-body[data-theme="scandinavian"] h3,
-body[data-theme="scandinavian"] h4,
-body[data-theme="scandinavian"] h5,
-body[data-theme="scandinavian"] h6 {
-  color: #1C1917 !important;
-}
-
-body:not([data-theme="bento-dark"]) p,
-body[data-theme="scandinavian"] p {
-  color: #57534E;
-}
-
-/* Ensure white text inside solid buttons remains white */
-body:not([data-theme="bento-dark"]) .btn-primary,
-body:not([data-theme="bento-dark"]) .btn-primary *,
-body:not([data-theme="bento-dark"]) .btn-success,
-body:not([data-theme="bento-dark"]) .btn-success *,
-body:not([data-theme="bento-dark"]) .btn-danger,
-body:not([data-theme="bento-dark"]) .btn-danger *,
-body[data-theme="scandinavian"] .btn-primary,
-body[data-theme="scandinavian"] .btn-primary *,
-body[data-theme="scandinavian"] .btn-success,
-body[data-theme="scandinavian"] .btn-success *,
-body[data-theme="scandinavian"] .btn-danger,
-body[data-theme="scandinavian"] .btn-danger * {
-  color: #FFFFFF !important;
-}
-
-
-/* 3. BENTO MIDNIGHT LUXURY (DARK THEME OVERRIDES) */
-body[data-theme="bento-dark"] .dark-card,
-body[data-theme="bento-dark"] .glass-card,
-body[data-theme="bento-dark"] [class*="Card"],
-body[data-theme="bento-dark"] .bento-card {
-  background: linear-gradient(145deg, rgba(14, 28, 54, 0.72) 0%, rgba(8, 17, 34, 0.88) 100%) !important;
-  border: 1px solid rgba(56, 189, 248, 0.18) !important;
-  border-radius: 20px !important;
-  backdrop-filter: blur(25px) !important;
-  -webkit-backdrop-filter: blur(25px) !important;
-  box-shadow: 0 16px 36px -10px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.08) !important;
-  color: #ffffff !important;
-}
-
-body[data-theme="bento-dark"] .dark-card:hover,
-body[data-theme="bento-dark"] .glass-card:hover,
-body[data-theme="bento-dark"] .bento-card:hover {
-  border-color: rgba(56, 189, 248, 0.38) !important;
-  box-shadow: 0 24px 48px -12px rgba(0, 0, 0, 0.65), 0 0 25px rgba(56, 189, 248, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.14) !important;
-}
-
-body[data-theme="bento-dark"] .btn-primary {
+.btn-primary {
   background: linear-gradient(135deg, #0284c7 0%, #2563eb 100%) !important;
   color: #ffffff !important;
   border: 1px solid rgba(255, 255, 255, 0.18) !important;
   box-shadow: 0 6px 20px rgba(37, 99, 235, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.25) !important;
 }
 
-body[data-theme="bento-dark"] .btn-secondary {
+.btn-primary:hover {
+  background: linear-gradient(135deg, #0369a1 0%, #1d4ed8 100%) !important;
+  box-shadow: 0 8px 24px rgba(37, 99, 235, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.35) !important;
+  transform: translateY(-2px);
+}
+
+.btn-secondary {
   background: rgba(15, 28, 54, 0.8) !important;
   color: #c8dcf5 !important;
   border: 1px solid rgba(56, 189, 248, 0.25) !important;
 }
 
-body[data-theme="bento-dark"] .btn-secondary:hover {
+.btn-secondary:hover {
   background: rgba(22, 42, 82, 0.9) !important;
   color: #ffffff !important;
   border-color: rgba(56, 189, 248, 0.45) !important;
+  transform: translateY(-2px);
 }
 
-body[data-theme="bento-dark"] .dark-input,
-body[data-theme="bento-dark"] .dark-select,
-body[data-theme="bento-dark"] input[type="text"],
-body[data-theme="bento-dark"] input[type="number"],
-body[data-theme="bento-dark"] input[type="search"],
-body[data-theme="bento-dark"] input[type="date"],
-body[data-theme="bento-dark"] input[type="tel"],
-body[data-theme="bento-dark"] select,
-body[data-theme="bento-dark"] textarea {
+.btn-success {
+  background: linear-gradient(135deg, #059669 0%, #10b981 100%) !important;
+  color: #ffffff !important;
+  border: 1px solid rgba(255, 255, 255, 0.18) !important;
+  box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4) !important;
+}
+
+.btn-danger {
+  background: linear-gradient(135deg, #dc2626 0%, #ef4444 100%) !important;
+  color: #ffffff !important;
+  border: 1px solid rgba(255, 255, 255, 0.18) !important;
+  box-shadow: 0 6px 20px rgba(239, 68, 68, 0.4) !important;
+}
+
+.btn-sm { padding: 7px 14px !important; font-size: 12px !important; }
+.btn-md { padding: 10px 20px !important; font-size: 14px !important; }
+.btn-lg { padding: 14px 28px !important; font-size: 16px !important; }
+
+/* 3. Inputs & Selects across the system */
+.dark-input, .dark-select, input[type="text"], input[type="number"], input[type="search"], input[type="date"], input[type="tel"] {
   background: rgba(11, 23, 45, 0.85) !important;
   border: 1px solid rgba(59, 130, 246, 0.28) !important;
   border-radius: 14px !important;
   color: #ffffff !important;
+  padding: 10px 14px !important;
+  transition: all 0.2s ease !important;
+  font-family: 'Cairo', sans-serif !important;
 }
 
-body[data-theme="bento-dark"] select option,
-body[data-theme="bento-dark"] .dark-select option {
-  background-color: #0b172d !important;
-  color: #ffffff !important;
+.dark-input:focus, .dark-select:focus, input:focus, select:focus {
+  border-color: #38bdf8 !important;
+  box-shadow: 0 0 16px rgba(56, 189, 248, 0.28), inset 0 1px 0 rgba(255, 255, 255, 0.05) !important;
+  outline: none !important;
 }
 
-body[data-theme="bento-dark"] select option:checked {
-  background-color: #1d4ed8 !important;
-  color: #ffffff !important;
+/* 4. Sleek Tables (Clients, Shifts, Inventory, Payments) */
+table {
+  border-collapse: separate !important;
+  border-spacing: 0 6px !important;
+  width: 100%;
 }
 
-body[data-theme="bento-dark"] thead th {
+thead th {
   background: rgba(12, 26, 51, 0.8) !important;
   color: #93c5fd !important;
+  font-weight: 800 !important;
+  padding: 12px 16px !important;
   border-bottom: 2px solid rgba(56, 189, 248, 0.2) !important;
 }
 
-body[data-theme="bento-dark"] tbody tr {
+tbody tr {
   background: rgba(14, 28, 54, 0.55) !important;
   border: 1px solid rgba(56, 189, 248, 0.1) !important;
+  border-radius: 12px !important;
+  transition: all 0.18s ease !important;
 }
 
-body[data-theme="bento-dark"] tbody tr:hover {
+tbody tr:hover {
   background: rgba(22, 44, 86, 0.75) !important;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3) !important;
 }
 
-body[data-theme="bento-dark"] tbody td {
+tbody td {
+  padding: 12px 16px !important;
   color: #ffffff !important;
 }
-

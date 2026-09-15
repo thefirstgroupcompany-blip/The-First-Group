@@ -168,23 +168,6 @@ export default function AdminLayout() {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('dashboard');
   const [activeModuleDropdown, setActiveModuleDropdown] = useState(null);
-  const [theme, setTheme] = useState(() => {
-    return localStorage.getItem('tfg_theme') || 'scandinavian';
-  });
-
-  const toggleTheme = () => {
-    const nextTheme = theme === 'scandinavian' ? 'bento-dark' : 'scandinavian';
-    setTheme(nextTheme);
-    localStorage.setItem('tfg_theme', nextTheme);
-    document.documentElement.setAttribute('data-theme', nextTheme);
-    document.body.setAttribute('data-theme', nextTheme);
-  };
-
-  useEffect(() => {
-    document.documentElement.setAttribute('data-theme', theme);
-    document.body.setAttribute('data-theme', theme);
-  }, [theme]);
-
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [systemInfo, setSystemInfo] = useState({ name: 'THE FIRST GROUP', logoUrl: '' });
   const [csRequests, setCsRequests] = useState([]);
@@ -393,25 +376,25 @@ export default function AdminLayout() {
             style={{
               position: 'absolute', top: 0, right: 0, bottom: 0,
               width: 'min(330px, 85vw)',
-              background: 'var(--bg-surface)',
-              borderLeft: '1px solid var(--border)',
-              boxShadow: '-10px 0 40px rgba(0,0,0,0.25)',
+              background: '#091322',
+              borderLeft: '1px solid rgba(56, 189, 248, 0.25)',
+              boxShadow: '-10px 0 40px rgba(0,0,0,0.85)',
               display: 'flex', flexDirection: 'column',
               overflowY: 'auto', padding: '16px',
               animation: 'slideInRight 0.25s ease-out'
             }}
           >
             {/* Drawer Header */}
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingBottom: 14, borderBottom: '1px solid var(--border)', marginBottom: 14 }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingBottom: 14, borderBottom: '1px solid rgba(255,255,255,0.08)', marginBottom: 14 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                <img src="/logo.png" alt="logo" style={{ height: 38, width: 'auto', maxWidth: 130, objectFit: 'contain' }} />
+                <img src="/logo.png" alt="logo" style={{ height: 38, width: 'auto', maxWidth: 130, objectFit: 'contain', filter: 'drop-shadow(0 0 8px rgba(56,189,248,0.5))' }} />
                 <div>
-                  <span style={{ fontSize: 11, color: 'var(--accent)', fontWeight: 700 }}>{user?.name} · مدير</span>
+                  <span style={{ fontSize: 11, color: '#38bdf8', fontWeight: 700 }}>{user?.name} · مدير</span>
                 </div>
               </div>
               <button
                 onClick={() => setMobileMenuOpen(false)}
-                style={{ background: 'var(--bg-elevated)', border: 'none', color: 'var(--text-muted)', borderRadius: 8, padding: 6, cursor: 'pointer' }}
+                style={{ background: 'rgba(255,255,255,0.05)', border: 'none', color: '#94a3b8', borderRadius: 8, padding: 6, cursor: 'pointer' }}
               >
                 <X size={18} />
               </button>
@@ -421,7 +404,7 @@ export default function AdminLayout() {
             <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
               {navGroups.map(group => (
                 <div key={group.id} style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-                  <div style={{ fontSize: 11, fontWeight: 800, color: 'var(--accent)', padding: '4px 6px', display: 'flex', alignItems: 'center', gap: 6 }}>
+                  <div style={{ fontSize: 11, fontWeight: 800, color: '#38bdf8', padding: '4px 6px', display: 'flex', alignItems: 'center', gap: 6 }}>
                     {React.createElement(group.icon, { size: 14 })}
                     <span>{group.title}</span>
                   </div>
@@ -438,9 +421,9 @@ export default function AdminLayout() {
                         style={{
                           display: 'flex', alignItems: 'center', gap: 10,
                           padding: '9px 12px', borderRadius: 8,
-                          background: isActive ? 'var(--bg-active)' : 'transparent',
-                          border: isActive ? '1px solid var(--accent)' : '1px solid transparent',
-                          color: isActive ? 'var(--accent)' : 'var(--text-primary)',
+                          background: isActive ? 'rgba(56, 189, 248, 0.18)' : 'rgba(255,255,255,0.03)',
+                          border: isActive ? '1px solid rgba(56, 189, 248, 0.4)' : '1px solid transparent',
+                          color: isActive ? '#38bdf8' : '#cbd5e1',
                           cursor: 'pointer', textAlign: 'right', fontSize: 12.5, fontWeight: isActive ? 800 : 500
                         }}
                       >
@@ -559,16 +542,16 @@ export default function AdminLayout() {
                     padding: '8px 13px',
                     borderRadius: 10,
                     border: isDropdownOpen
-                      ? '1px solid var(--accent)'
+                      ? '1px solid rgba(56, 189, 248, 0.6)'
                       : isGroupActive
-                      ? '1px solid var(--border-glow)'
+                      ? '1px solid rgba(56, 189, 248, 0.35)'
                       : '1px solid transparent',
                     background: isDropdownOpen
-                      ? 'var(--bg-active)'
+                      ? 'rgba(56, 189, 248, 0.22)'
                       : isGroupActive
-                      ? 'var(--bg-elevated)'
+                      ? 'rgba(56, 189, 248, 0.12)'
                       : 'transparent',
-                    color: isDropdownOpen || isGroupActive ? 'var(--accent)' : 'var(--text-secondary)',
+                    color: isDropdownOpen || isGroupActive ? '#38bdf8' : '#cbd5e1',
                     fontWeight: isDropdownOpen || isGroupActive ? 800 : 600,
                     fontSize: 13,
                     cursor: 'pointer',
@@ -594,11 +577,11 @@ export default function AdminLayout() {
                       position: 'absolute',
                       top: 'calc(100% + 8px)',
                       right: 0,
-                      background: 'var(--bg-card)',
+                      background: 'rgba(10, 20, 36, 0.98)',
                       backdropFilter: 'blur(24px)',
-                      border: '1px solid var(--border)',
+                      border: '1px solid rgba(56, 189, 248, 0.35)',
                       borderRadius: 14,
-                      boxShadow: '0 20px 50px rgba(0, 0, 0, 0.18), 0 4px 16px rgba(0,0,0,0.06)',
+                      boxShadow: '0 20px 50px rgba(0, 0, 0, 0.8), 0 0 25px rgba(56, 189, 248, 0.15)',
                       padding: 14,
                       zIndex: 100,
                       minWidth: group.items.length > 3 ? 480 : 290,
@@ -606,8 +589,8 @@ export default function AdminLayout() {
                     }}
                   >
                     {/* Header in dropdown */}
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '4px 6px 10px', borderBottom: '1px solid var(--border)', marginBottom: 8 }}>
-                      <span style={{ fontSize: 13, fontWeight: 800, color: 'var(--accent)' }}>{group.title}</span>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '4px 6px 10px', borderBottom: '1px solid rgba(255, 255, 255, 0.08)', marginBottom: 8 }}>
+                      <span style={{ fontSize: 13, fontWeight: 800, color: '#38bdf8' }}>{group.title}</span>
                     </div>
 
                     {/* Grid of items */}
@@ -633,29 +616,29 @@ export default function AdminLayout() {
                               gap: 10,
                               padding: '10px 12px',
                               borderRadius: 10,
-                              border: isItemActive ? '1px solid var(--accent)' : '1px solid transparent',
-                              background: isItemActive ? 'var(--bg-active)' : 'transparent',
-                              color: isItemActive ? 'var(--accent)' : 'var(--text-primary)',
+                              border: isItemActive ? '1px solid rgba(56, 189, 248, 0.5)' : '1px solid transparent',
+                              background: isItemActive ? 'rgba(56, 189, 248, 0.18)' : 'rgba(255, 255, 255, 0.03)',
+                              color: isItemActive ? '#ffffff' : '#e2e8f0',
                               cursor: 'pointer',
                               textAlign: 'right',
                               transition: 'all 0.15s ease'
                             }}
                             onMouseEnter={(e) => {
                               if (!isItemActive) {
-                                e.currentTarget.style.background = 'var(--bg-elevated)';
+                                e.currentTarget.style.background = 'rgba(255, 255, 255, 0.07)';
                               }
                             }}
                             onMouseLeave={(e) => {
                               if (!isItemActive) {
-                                e.currentTarget.style.background = 'transparent';
+                                e.currentTarget.style.background = 'rgba(255, 255, 255, 0.03)';
                               }
                             }}
                           >
                             <div style={{
                               width: 34, height: 34, borderRadius: 8,
                               display: 'flex', alignItems: 'center', justifyContent: 'center',
-                              background: isItemActive ? 'var(--bg-active)' : 'var(--bg-elevated)',
-                              color: isItemActive ? 'var(--accent)' : 'var(--text-muted)', flexShrink: 0
+                              background: isItemActive ? 'rgba(56, 189, 248, 0.25)' : 'rgba(15, 23, 42, 0.8)',
+                              color: isItemActive ? '#38bdf8' : '#94a3b8', flexShrink: 0
                             }}>
                               <ItemIcon size={17} />
                             </div>
@@ -664,7 +647,7 @@ export default function AdminLayout() {
                                 {item.label}
                               </p>
                               {item.desc && (
-                                <p style={{ fontSize: 10.5, color: 'var(--text-muted)', margin: '2px 0 0', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                <p style={{ fontSize: 10.5, color: '#94a3b8', margin: '2px 0 0', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                                   {item.desc}
                                 </p>
                               )}
@@ -718,36 +701,6 @@ export default function AdminLayout() {
               }}>
                 {csRequests.filter(r => r.status === 'pending').length}
               </span>
-            )}
-          </button>
-
-          {/* Theme Switcher Toggle (Scandinavian Luxury vs Bento Dark) */}
-          <button
-            type="button"
-            onClick={toggleTheme}
-            className="btn btn-secondary btn-sm no-print"
-            style={{
-              padding: '6px 12px',
-              borderRadius: 10,
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              gap: 6,
-              fontSize: 12,
-              fontWeight: 800
-            }}
-            title="تبديل نمط التصميم (فخامة اسكندنافية / بينتو ليلي)"
-          >
-            {theme === 'scandinavian' ? (
-              <>
-                <span style={{ fontSize: 14 }}>🌿</span>
-                <span className="hidden-on-mobile">الاسكندنافية الدافئة</span>
-              </>
-            ) : (
-              <>
-                <span style={{ fontSize: 14 }}>🌌</span>
-                <span className="hidden-on-mobile">بينتو الليلي</span>
-              </>
             )}
           </button>
 
