@@ -1,0 +1,105 @@
+﻿rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // CONFIG — system settings read-only (needed for PWA)
+    match /config/{docId} {
+      allow read: if true;
+      allow write: if false;
+    }
+
+    // ANNOUNCEMENTS — public read (banners)
+    match /announcements/{docId} {
+      allow read: if true;
+      allow write: if false;
+    }
+
+    // PACKAGES — public read
+    match /packages/{docId} {
+      allow read: if true;
+      allow write: if false;
+    }
+
+    // CLIENTS — targeted read allowed (for clientPortalLogin queries)
+    // Write limited to client-only fields (pin setup, feedback)
+    match /clients/{clientId} {
+      allow get: if true;
+      allow list: if true;
+      allow create: if false;
+      allow update: if
+        request.resource.data.diff(resource.data).affectedKeys()
+          .hasOnly(['pinCode', 'isPinSet', 'pinSetAt', 'pinResetAt', 'feedback', 'feedbackAt']);
+      allow delete: if false;
+    }
+
+    // CLIENT SUBSCRIPTIONS — portal display
+    match /client_subscriptions/{subId} {
+      allow read: if true;
+      allow write: if false;
+    }
+
+    // SESSIONS — portal display
+    match /sessions/{sessionId} {
+      allow read: if true;
+      allow write: if false;
+    }
+
+    // PAYMENTS — portal display
+    match /payments/{paymentId} {
+      allow read: if true;
+      allow write: if false;
+    }
+
+    // INSTRUCTORS — portal needs list + pin update
+    match /instructors/{instId} {
+      allow read: if true;
+      allow update: if
+        request.resource.data.diff(resource.data).affectedKeys()
+          .hasOnly(['pinCode', 'isPinSet', 'pinSetAt', 'pinResetAt']);
+      allow create, delete: if false;
+    }
+
+    // COURSE SCHEDULES — read for instructor portal
+    match /course_schedules/{docId} {
+      allow read: if true;
+      allow write: if false;
+    }
+
+    // SHIFTS — read for handover display
+    match /shifts/{shiftId} {
+      allow read: if true;
+      allow write: if false;
+    }
+
+    // CAFE SHIFTS
+    match /cafe_shifts/{shiftId} {
+      allow read: if true;
+      allow write: if false;
+    }
+
+    // WALLET TRANSACTIONS — portal display
+    match /wallet_transactions/{docId} {
+      allow read: if true;
+      allow write: if false;
+    }
+
+    // LOYALTY
+    match /loyalty/{docId} {
+      allow read: if true;
+      allow write: if false;
+    }
+
+    // CLIENT FEEDBACK — allow creation
+    match /client_feedback/{docId} {
+      allow read: if false;
+      allow create: if true;
+      allow update, delete: if false;
+    }
+
+    // ALL OTHER COLLECTIONS fully blocked from browser
+    // (users, employees, finances, vendor_invoices, activity_logs, etc.)
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

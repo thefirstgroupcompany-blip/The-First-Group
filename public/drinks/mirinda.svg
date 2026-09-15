@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200">
+    <defs>
+      <linearGradient id="canMetalM" x1="0%" y1="0%" x2="100%" y2="0%">
+        <stop offset="0%" stop-color="#94a3b8"/>
+        <stop offset="50%" stop-color="#f1f5f9"/>
+        <stop offset="100%" stop-color="#64748b"/>
+      </linearGradient>
+      <linearGradient id="mirindaBody" x1="0%" y1="0%" x2="100%" y2="0%">
+        <stop offset="0%" stop-color="#c2410c"/>
+        <stop offset="25%" stop-color="#ea580c"/>
+        <stop offset="65%" stop-color="#f97316"/>
+        <stop offset="100%" stop-color="#9a3412"/>
+      </linearGradient>
+      <filter id="mirindaShadow" x="-20%" y="-20%" width="140%" height="140%">
+        <feDropShadow dx="0" dy="6" stdDeviation="10" flood-color="#ea580c" flood-opacity="0.55"/>
+      </filter>
+    </defs>
+    <circle cx="100" cy="100" r="88" fill="rgba(234, 88, 12, 0.16)" filter="url(#mirindaShadow)"/>
+    <ellipse cx="100" cy="32" rx="38" ry="8" fill="url(#canMetalM)"/>
+    <ellipse cx="100" cy="31" rx="34" ry="6" fill="#cbd5e1"/>
+    <path d="M62 32 L62 160 Q62 172 74 174 L126 174 Q138 172 138 160 L138 32 Z" fill="url(#mirindaBody)" filter="url(#mirindaShadow)"/>
+    <ellipse cx="100" cy="168" rx="34" ry="5" fill="url(#canMetalM)" opacity="0.7"/>
+    <path d="M96 64 C96 55 106 52 108 50 C110 54 108 62 100 66 Z" fill="#16a34a"/>
+    <text x="100" y="92" font-family="Arial Black, Impact, sans-serif" font-size="28" font-weight="900" fill="#ffffff" text-anchor="middle">M</text>
+    <text x="100" y="110" font-family="Arial, sans-serif" font-size="13" font-weight="900" fill="#ffffff" text-anchor="middle" letter-spacing="0.5">MIRINDA</text>
+    <circle cx="100" cy="134" r="14" fill="#fed7aa" stroke="#ffffff" stroke-width="1.5"/>
+    <circle cx="100" cy="134" r="12" fill="#ea580c"/>
+    <path d="M100 122 L100 146 M88 134 L112 134 M92 126 L108 142 M92 142 L108 126" stroke="#fed7aa" stroke-width="1.5"/>
+    <text x="100" y="157" font-family="Arial, sans-serif" font-size="7.5" font-weight="800" fill="#ffedd5" text-anchor="middle">ORANGE • برتقال</text>
+    <rect x="68" y="34" width="7" height="132" fill="#ffffff" opacity="0.35" rx="3"/>
+  </svg>

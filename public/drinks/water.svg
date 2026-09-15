@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200">
+    <defs>
+      <linearGradient id="bottleGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+        <stop offset="0%" stop-color="#93c5fd" stop-opacity="0.8"/>
+        <stop offset="25%" stop-color="#e0f2fe" stop-opacity="0.95"/>
+        <stop offset="60%" stop-color="#bae6fd" stop-opacity="0.85"/>
+        <stop offset="100%" stop-color="#60a5fa" stop-opacity="0.9"/>
+      </linearGradient>
+      <linearGradient id="labelGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stop-color="#0284c7"/>
+        <stop offset="50%" stop-color="#0369a1"/>
+        <stop offset="100%" stop-color="#0c4a6e"/>
+      </linearGradient>
+      <linearGradient id="capGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+        <stop offset="0%" stop-color="#1d4ed8"/>
+        <stop offset="50%" stop-color="#3b82f6"/>
+        <stop offset="100%" stop-color="#1e40af"/>
+      </linearGradient>
+      <filter id="waterGlow" x="-20%" y="-20%" width="140%" height="140%">
+        <feDropShadow dx="0" dy="6" stdDeviation="8" flood-color="#0284c7" flood-opacity="0.4"/>
+      </filter>
+    </defs>
+    <circle cx="100" cy="100" r="88" fill="rgba(14, 165, 233, 0.12)" filter="url(#waterGlow)"/>
+    <rect x="86" y="22" width="28" height="14" rx="3" fill="url(#capGrad)"/>
+    <rect x="84" y="36" width="32" height="6" rx="2" fill="#2563eb"/>
+    <path d="M88 42 L88 56 Q88 66 74 76 L74 82 L126 82 L126 76 Q112 66 112 56 L112 42 Z" fill="url(#bottleGrad)"/>
+    <path d="M74 82 L71 110 Q69 122 72 138 L73 162 Q74 172 82 176 L118 176 Q126 172 127 162 L128 138 Q131 122 129 110 L126 82 Z" fill="url(#bottleGrad)" filter="url(#waterGlow)"/>
+    <path d="M73 96 Q100 100 127 96" stroke="#ffffff" stroke-width="2" fill="none" opacity="0.7"/>
+    <path d="M72 152 Q100 156 128 152" stroke="#ffffff" stroke-width="2" fill="none" opacity="0.6"/>
+    <rect x="70" y="108" width="60" height="36" rx="4" fill="url(#labelGrad)" stroke="#38bdf8" stroke-width="1"/>
+    <path d="M82 130 L92 118 L100 125 L108 116 L118 130 Z" fill="#38bdf8" opacity="0.7"/>
+    <path d="M88 130 L96 122 L104 130 Z" fill="#ffffff" opacity="0.9"/>
+    <text x="100" y="139" font-family="Arial, sans-serif" font-size="7.5" font-weight="900" fill="#ffffff" text-anchor="middle" letter-spacing="0.5">AQUA PURE</text>
+    <text x="100" y="130" font-family="Arial, sans-serif" font-size="5.5" font-weight="700" fill="#bae6fd" text-anchor="middle">مياه معدنية</text>
+    <path d="M78 86 L76 166" stroke="#ffffff" stroke-width="3.5" stroke-linecap="round" opacity="0.75"/>
+    <path d="M83 88 L82 164" stroke="#ffffff" stroke-width="1.5" stroke-linecap="round" opacity="0.4"/>
+  </svg>

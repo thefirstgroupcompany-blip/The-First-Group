@@ -1,0 +1,815 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>فيديو شرح برنامج THE FIRST GROUP</title>
+  <style>
+    :root {
+      --bg: #050b18;
+      --card-bg: #0c182e;
+      --accent: #38bdf8;
+      --accent-glow: rgba(56, 189, 248, 0.4);
+      --success: #10b981;
+      --danger: #ef4444;
+      --warning: #f59e0b;
+      --border: rgba(255, 255, 255, 0.12);
+      --text: #ffffff;
+      --text-muted: #94a3b8;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Noto Kufi Arabic', sans-serif;
+      user-select: none;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 20px 10px;
+    }
+
+    /* Video Player Container */
+    .player-wrapper {
+      width: 100%;
+      max-width: 1050px;
+      background: #02050c;
+      border-radius: 18px;
+      overflow: hidden;
+      box-shadow: 0 30px 70px rgba(0, 0, 0, 0.9), 0 0 30px var(--accent-glow);
+      border: 1.5px solid rgba(56, 189, 248, 0.35);
+      position: relative;
+    }
+
+    /* Screen Stage Area (16:9) */
+    .stage {
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      position: relative;
+      background: #070f22;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Animated Virtual Mouse Cursor */
+    .cursor {
+      position: absolute;
+      width: 24px;
+      height: 24px;
+      z-index: 200;
+      pointer-events: none;
+      transform: translate(-3px, -3px);
+      transition: all 0.65s cubic-bezier(0.2, 0.8, 0.2, 1);
+      filter: drop-shadow(0 3px 6px rgba(0,0,0,0.8));
+    }
+
+    .cursor-ripple {
+      position: absolute;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: rgba(56, 189, 248, 0.6);
+      border: 2px solid #38bdf8;
+      z-index: 199;
+      transform: translate(-50%, -50%) scale(0);
+      opacity: 0;
+      pointer-events: none;
+      transition: transform 0.35s ease-out, opacity 0.35s ease-out;
+    }
+
+    .cursor-ripple.active {
+      transform: translate(-50%, -50%) scale(1.5);
+      opacity: 1;
+    }
+
+    /* Scene Elements */
+    .scene {
+      position: absolute;
+      inset: 0;
+      display: none;
+      flex-direction: column;
+      padding: 24px;
+      opacity: 0;
+      transition: opacity 0.4s ease;
+    }
+
+    .scene.active {
+      display: flex;
+      opacity: 1;
+    }
+
+    /* Top Mock Header */
+    .mock-header {
+      background: rgba(12, 24, 46, 0.9);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 10px 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+      font-size: 13px;
+    }
+
+    /* Big Explanatory Subtitle Card */
+    .banner {
+      position: absolute;
+      bottom: 75px;
+      left: 20px;
+      right: 20px;
+      z-index: 150;
+      display: flex;
+      justify-content: center;
+      pointer-events: none;
+    }
+
+    .banner-text {
+      background: rgba(4, 10, 24, 0.92);
+      border: 1.5px solid var(--accent);
+      border-radius: 14px;
+      padding: 12px 28px;
+      font-size: 15px;
+      font-weight: 800;
+      color: #ffffff;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+      text-align: center;
+      line-height: 1.6;
+    }
+
+    /* Play/Pause Center Overlay on Startup */
+    .start-overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(2, 6, 17, 0.75);
+      backdrop-filter: blur(5px);
+      z-index: 300;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: opacity 0.3s;
+    }
+
+    .play-big-btn {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      background: var(--accent);
+      color: #040914;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 32px;
+      box-shadow: 0 0 40px rgba(56, 189, 248, 0.6);
+      margin-bottom: 16px;
+      transition: transform 0.2s;
+    }
+
+    .play-big-btn:hover {
+      transform: scale(1.1);
+    }
+
+    /* Bottom Control Bar */
+    .controls {
+      height: 65px;
+      background: #060e20;
+      border-top: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 0 18px;
+      position: relative;
+      z-index: 250;
+    }
+
+    .progress-wrap {
+      width: 100%;
+      height: 6px;
+      background: rgba(255, 255, 255, 0.15);
+      border-radius: 3px;
+      cursor: pointer;
+      margin-bottom: 10px;
+      position: relative;
+    }
+
+    .progress-bar {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #0284c7, #38bdf8);
+      border-radius: 3px;
+      transition: width 0.1s linear;
+    }
+
+    .ctrl-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .ctrl-group {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .btn-action {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid var(--border);
+      color: #ffffff;
+      padding: 6px 12px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s;
+    }
+
+    .btn-action:hover {
+      background: rgba(56, 189, 248, 0.2);
+      border-color: #38bdf8;
+      color: #38bdf8;
+    }
+
+    /* Scene Chapters Quick Switcher */
+    .chapters-row {
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      margin-top: 14px;
+      width: 100%;
+      max-width: 1050px;
+      padding-bottom: 8px;
+    }
+
+    .chip-btn {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      padding: 8px 14px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.2s;
+    }
+
+    .chip-btn.active, .chip-btn:hover {
+      background: rgba(56, 189, 248, 0.18);
+      border-color: var(--accent);
+      color: #ffffff;
+    }
+
+    /* Modal Simulation */
+    .dialog-box {
+      background: #09152a;
+      border: 1.5px solid var(--accent);
+      border-radius: 14px;
+      padding: 18px;
+      width: 440px;
+      box-shadow: 0 15px 40px rgba(0, 0, 0, 0.8);
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      display: none;
+    }
+
+    .dialog-box.show {
+      display: block;
+      animation: popIn 0.3s ease-out;
+    }
+
+    @keyframes popIn {
+      0% { opacity: 0; transform: translate(-50%, -45%) scale(0.95); }
+      100% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="player-wrapper">
+    <!-- Viewport / Stage -->
+    <div class="stage" id="stage">
+      
+      <!-- Virtual Animated Mouse Cursor -->
+      <svg class="cursor" id="mouseCursor" viewBox="0 0 24 24" fill="none">
+        <path d="M4 3L11 20L14 13L21 10L4 3Z" fill="#38bdf8" stroke="#ffffff" stroke-width="2" stroke-linejoin="round"/>
+      </svg>
+      <div class="cursor-ripple" id="mouseRipple"></div>
+
+      <!-- Start Overlay -->
+      <div class="start-overlay" id="startOverlay" onclick="startVideo()">
+        <div class="play-big-btn">▶</div>
+        <h2 style="font-size: 22px; font-weight: 900; margin-bottom: 6px;">اضغط هنا لتشغيل فيديو الشرح 🎬</h2>
+        <p style="font-size: 13px; color: #94a3b8;">شرح عملي متحرك خطوة بخطوة لشاشات النظام</p>
+      </div>
+
+      <!-- ================================================================= -->
+      <!-- المشهد 1: المقدمة -->
+      <!-- ================================================================= -->
+      <div class="scene" id="sc1" style="justify-content: center; align-items: center; text-align: center;">
+        <div style="font-size: 54px; margin-bottom: 14px;">🏋️‍♂️</div>
+        <h1 style="font-size: 32px; font-weight: 900; color: #ffffff; margin-bottom: 10px;">THE FIRST GROUP</h1>
+        <h3 style="font-size: 18px; color: #38bdf8; margin-bottom: 16px;">دليل تدريب موظف الاستقبال وإدارة الصالة</h3>
+        <span style="background: rgba(56,189,248,0.12); padding: 6px 18px; border-radius: 20px; font-size: 13px; color: #94a3b8;">
+          الشيفتات • تسجيل الأعضاء • الباركود • الخزينة • التليجرام
+        </span>
+      </div>
+
+      <!-- ================================================================= -->
+      <!-- المشهد 2: فتح المناوبة -->
+      <!-- ================================================================= -->
+      <div class="scene" id="sc2">
+        <div class="mock-header">
+          <div><b style="color: #38bdf8;">تبويب: مناوبتي</b> — شاشة الموظف</div>
+          <span style="color: #94a3b8;">الموظف: كابتن حسام حسن</span>
+        </div>
+
+        <div style="flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; background: rgba(12, 24, 46, 0.5); border-radius: 14px; border: 1px dashed var(--border);">
+          <div style="font-size: 36px; margin-bottom: 10px;">🕒</div>
+          <h3 style="font-size: 18px; margin-bottom: 6px;">لا توجد مناوبة مفتوحة</h3>
+          <p style="color: #94a3b8; font-size: 13px; margin-bottom: 18px;">يجب فتح المناوبة قبل تسجيل أي مبالغ أو تذاكر</p>
+          <button id="uiBtnOpenShift" style="padding: 12px 26px; border-radius: 10px; background: #10b981; color: #fff; font-size: 14px; font-weight: 800; border: none;">
+            + فتح مناوبة جديدة الآن
+          </button>
+        </div>
+
+        <div class="dialog-box" id="uiModalOpenShift">
+          <h4 style="color: #38bdf8; font-size: 15px; margin-bottom: 10px;">فتح مناوبة وتسجيل عهدة البداية</h4>
+          <p style="font-size: 12px; color: #94a3b8; margin-bottom: 6px;">مبلغ الفكة المبدئي بالدرج:</p>
+          <input type="text" id="uiInputStartCash" value="" placeholder="مثلاً: 200" style="width: 100%; padding: 10px; border-radius: 8px; background: #040914; border: 1px solid var(--border); color: #fff; font-size: 14px; margin-bottom: 14px;">
+          <button id="uiBtnConfirmOpen" style="width: 100%; padding: 10px; border-radius: 8px; background: #0284c7; color: #fff; font-weight: 800; border: none;">
+            تأكيد فتح المناوبة
+          </button>
+        </div>
+      </div>
+
+      <!-- ================================================================= -->
+      <!-- المشهد 3: تسجيل عضو وتفعيل باقة -->
+      <!-- ================================================================= -->
+      <div class="scene" id="sc3">
+        <div class="mock-header">
+          <div><b style="color: #10b981;">تبويب: الأعضاء</b> — قائمة المشتركين</div>
+          <button id="uiBtnNewMember" style="padding: 6px 14px; border-radius: 8px; background: #10b981; color: #fff; font-weight: 800; border: none; font-size: 12px;">
+            + عضو جديد
+          </button>
+        </div>
+
+        <div style="flex: 1; background: rgba(12, 24, 46, 0.6); border-radius: 14px; padding: 14px; border: 1px solid var(--border);">
+          <div style="display: flex; justify-content: space-between; border-bottom: 1px solid var(--border); padding-bottom: 8px; font-size: 12px; color: #94a3b8;">
+            <span>الكود</span><span>اسم العضو</span><span>رقم الهاتف</span><span>الحالة</span>
+          </div>
+          <div style="display: flex; justify-content: space-between; padding: 10px 0; font-size: 13px;">
+            <span style="color: #38bdf8; font-weight: 700;">#1042</span>
+            <span>محمد أحمد عبدالله</span>
+            <span>01012345678</span>
+            <span style="color: #10b981; font-weight: 800;">ساري (متبقي 28 يوم)</span>
+          </div>
+        </div>
+
+        <div class="dialog-box" id="uiModalMember">
+          <h4 style="color: #10b981; font-size: 15px; margin-bottom: 10px;">إضافة مشترك جديد وتحديد الباقة</h4>
+          <input type="text" id="uiInpName" placeholder="اسم المشترك..." style="width: 100%; padding: 8px; border-radius: 6px; background: #040914; border: 1px solid var(--border); color: #fff; font-size: 13px; margin-bottom: 8px;">
+          <input type="text" id="uiInpPhone" placeholder="رقم الهاتف..." style="width: 100%; padding: 8px; border-radius: 6px; background: #040914; border: 1px solid var(--border); color: #fff; font-size: 13px; margin-bottom: 8px;">
+          <div style="padding: 8px; background: rgba(56,189,248,0.1); border-radius: 6px; font-size: 12px; color: #38bdf8; margin-bottom: 12px;">
+            باقة حديد شهري — 500 ج.م (كاش)
+          </div>
+          <button id="uiBtnSaveMember" style="width: 100%; padding: 10px; border-radius: 8px; background: #10b981; color: #fff; font-weight: 800; border: none;">
+            حفظ وإصدار إيصال العضوية
+          </button>
+        </div>
+      </div>
+
+      <!-- ================================================================= -->
+      <!-- المشهد 4: فحص الباركود وتسجيل الحضور -->
+      <!-- ================================================================= -->
+      <div class="scene" id="sc4">
+        <div class="mock-header">
+          <div><b style="color: #38bdf8;">تبويب: فحص العضوية (Scan)</b></div>
+          <span style="color: #94a3b8;">مسح الباركود السريع</span>
+        </div>
+
+        <div style="flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px;">
+          <div style="display: flex; gap: 10px; width: 440px; max-width: 90%;">
+            <input type="text" id="uiScanInput" placeholder="مسح الباركود أو إدخال الكود..." style="flex: 1; padding: 12px; border-radius: 10px; background: #040914; border: 2px solid var(--accent); color: #fff; text-align: center; font-size: 15px;">
+            <button id="uiBtnScan" style="padding: 12px 20px; border-radius: 10px; background: var(--accent); color: #040914; font-weight: 800; border: none;">
+              فحص
+            </button>
+          </div>
+
+          <div id="uiScanCard" style="display: none; width: 440px; max-width: 90%; background: rgba(16,185,129,0.15); border: 2px solid #10b981; border-radius: 14px; padding: 16px; text-align: center;">
+            <div style="font-size: 32px; margin-bottom: 4px;">✅</div>
+            <h3 style="color: #10b981; font-size: 17px; font-weight: 900;">عضوية نشطة — تم تسجيل حضور اليوم</h3>
+            <p style="font-size: 15px; font-weight: 800; color: #fff; margin: 4px 0;">محمد أحمد عبدالله (#1042)</p>
+            <p style="font-size: 12px; color: #94a3b8;">باقة حديد • متبقي 28 يوماً</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- ================================================================= -->
+      <!-- المشهد 5: تقفيل المناوبة وجرد الخزينة -->
+      <!-- ================================================================= -->
+      <div class="scene" id="sc5">
+        <div class="mock-header">
+          <div><b style="color: #ef4444;">نهاية الشيفت: تقفيل وتسليم المناوبة</b></div>
+          <button id="uiBtnCloseShift" style="padding: 6px 14px; border-radius: 8px; background: #ef4444; color: #fff; font-weight: 800; border: none; font-size: 12px;">
+            تقفيل المناوبة
+          </button>
+        </div>
+
+        <div style="flex: 1; display: flex; align-items: center; justify-content: center;">
+          <div class="dialog-box show" style="position: static; transform: none; width: 460px;">
+            <h4 style="color: #ef4444; font-size: 16px; font-weight: 900; margin-bottom: 10px;">محضر تسليم وجرد الخزينة</h4>
+            <div style="background: rgba(255,255,255,0.04); border-radius: 8px; padding: 10px; font-size: 13px; line-height: 1.8; margin-bottom: 10px;">
+              <div style="display: flex; justify-content: space-between;"><span>العهدة المبدئية:</span> <b>200 ج.م</b></div>
+              <div style="display: flex; justify-content: space-between;"><span>مقبوضات الاشتراكات بالكاش:</span> <b>500 ج.م</b></div>
+              <div style="display: flex; justify-content: space-between;"><span>المصروفات النقدية:</span> <b>-50 ج.م</b></div>
+              <hr style="border: 0.5px solid var(--border); margin: 4px 0;">
+              <div style="display: flex; justify-content: space-between; color: #38bdf8; font-weight: 800;">
+                <span>النقدية المتوقعة بالدرج:</span> <span>650 ج.م</span>
+              </div>
+            </div>
+
+            <p style="font-size: 12px; color: #94a3b8; margin-bottom: 4px;">المبلغ الفعلي الذي تم عده بالدرج:</p>
+            <input type="text" id="uiInpActualCash" value="" placeholder="المبلغ الفعلي..." style="width: 100%; padding: 10px; border-radius: 8px; background: #040914; border: 1.5px solid #10b981; color: #fff; font-size: 15px; font-weight: 800; margin-bottom: 8px;">
+
+            <div id="uiDiffBadge" style="display: none; padding: 6px; border-radius: 6px; background: rgba(16,185,129,0.2); color: #10b981; font-weight: 800; font-size: 12px; text-align: center; margin-bottom: 10px;">
+              ✓ الفارق: 0 ج.م (الخزينة مطابقة تماماً)
+            </div>
+
+            <button id="uiBtnConfirmClose" style="width: 100%; padding: 10px; border-radius: 8px; background: #ef4444; color: #fff; font-weight: 800; border: none;">
+              تأكيد تقفيل المناوبة وترحيل الإشعار
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ================================================================= -->
+      <!-- المشهد 6: المساعد المالي عبر التليجرام -->
+      <!-- ================================================================= -->
+      <div class="scene" id="sc6" style="justify-content: center; align-items: center;">
+        <div style="width: 350px; background: #17212b; border-radius: 20px; border: 2px solid #242f3d; padding: 14px; box-shadow: 0 15px 40px rgba(0,0,0,0.8);">
+          <div style="display: flex; align-items: center; gap: 8px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 10px; margin-bottom: 12px;">
+            <div style="width: 32px; height: 32px; border-radius: 50%; background: #0284c7; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 12px;">TFG</div>
+            <div>
+              <b style="font-size: 13px; color: #fff;">THE FIRST GROUP</b>
+              <div style="font-size: 10px; color: #38bdf8;">bot • متصل</div>
+            </div>
+          </div>
+
+          <div style="display: flex; flex-direction: column; gap: 8px; min-height: 160px; justify-content: flex-end;">
+            <div id="uiTgShiftNotice" style="display: none; background: #1e2c3a; padding: 10px; border-radius: 10px; font-size: 12px; line-height: 1.5;">
+              🔔 <b>إشعار تقفيل مناوبة:</b><br>
+              • الموظف: حسام حسن<br>
+              • المبلغ المسلم: <b>650 ج.م</b> (الفارق: 0)<br>
+              • المستلم: الإدارة 🔒
+            </div>
+
+            <div id="uiTgProfitReply" style="display: none; background: #133a27; border: 1px solid #10b981; padding: 10px; border-radius: 10px; font-size: 12px; line-height: 1.5;">
+              💰 <b>تقرير صافي الأرباح:</b><br>
+              • صافي أرباح اليوم: <b>650 ج.م</b><br>
+              • صافي أرباح الشهر: <b>24,800 ج.م</b>
+            </div>
+          </div>
+
+          <div style="margin-top: 12px; display: grid; grid-template-columns: 1fr 1fr; gap: 6px;">
+            <button id="uiBtnTgProfit" style="padding: 8px; background: #2b394a; border: none; border-radius: 6px; color: #fff; font-size: 11px; font-weight: 700;">
+              💰 صافي الأرباح
+            </button>
+            <button style="padding: 8px; background: #2b394a; border: none; border-radius: 6px; color: #fff; font-size: 11px; font-weight: 700;">
+              📊 تقرير اليوم
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ================================================================= -->
+      <!-- المشهد 7: الخاتمة -->
+      <!-- ================================================================= -->
+      <div class="scene" id="sc7" style="justify-content: center; align-items: center; text-align: center;">
+        <div style="font-size: 50px; margin-bottom: 12px;">🏆</div>
+        <h2 style="font-size: 26px; font-weight: 900; margin-bottom: 8px;">THE FIRST GROUP</h2>
+        <p style="font-size: 16px; color: #38bdf8; font-weight: 700; margin-bottom: 18px;">
+          أداء فائق • دقة حسابية • أمان مالي متكامل
+        </p>
+        <button onclick="restartVideo()" style="padding: 10px 22px; border-radius: 10px; background: #38bdf8; color: #040914; font-weight: 800; border: none; cursor: pointer;">
+          🔄 إعادة تشغيل الفيديو
+        </button>
+      </div>
+
+      <!-- Explanatory Subtitle Banner -->
+      <div class="banner">
+        <div class="banner-text" id="bannerText">
+          مرحباً بكم في الدليل المرئي لشاشات نظام THE FIRST GROUP
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Video Controls Bar -->
+    <div class="controls">
+      <div class="progress-wrap" onclick="seekByClick(event)">
+        <div class="progress-bar" id="pBar"></div>
+      </div>
+
+      <div class="ctrl-row">
+        <div class="ctrl-group">
+          <button class="btn-action" id="btnPlayPause" onclick="togglePlay()">
+            <span id="playTxt">▶ تشغيل</span>
+          </button>
+          <button class="btn-action" onclick="prevStep()">السابق ⏮</button>
+          <button class="btn-action" onclick="nextStep()">التالي ⏭</button>
+          <span style="font-size: 12px; color: #94a3b8; direction: ltr; font-weight: 700;" id="timerTxt">00:00 / 02:00</span>
+        </div>
+
+        <div class="ctrl-group">
+          <span style="font-size: 12px; color: #38bdf8; font-weight: 800;" id="chapterTxt">1. المقدمة</span>
+          <button class="btn-action" onclick="toggleFullscreen()">⛶ تكبير الشاشة</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Chapters Quick Switcher -->
+  <div class="chapters-row">
+    <button class="chip-btn active" onclick="jumpToScene(0)">1. المقدمة</button>
+    <button class="chip-btn" onclick="jumpToScene(1)">2. فتح المناوبة</button>
+    <button class="chip-btn" onclick="jumpToScene(2)">3. تسجيل عضو جديد</button>
+    <button class="chip-btn" onclick="jumpToScene(3)">4. فحص الباركود</button>
+    <button class="chip-btn" onclick="jumpToScene(4)">5. تقفيل المناوبة</button>
+    <button class="chip-btn" onclick="jumpToScene(5)">6. بوت التليجرام</button>
+    <button class="chip-btn" onclick="jumpToScene(6)">7. الخاتمة</button>
+  </div>
+
+  <script>
+    // Pure, Rock-Solid Animation Timeline without audio or external dependencies
+    const SCENES = [
+      {
+        id: 'sc1', name: 'المقدمة', duration: 12,
+        banner: 'أهلاً بكم في الدليل التدريبي المرئي لمنظومة THE FIRST GROUP لإدارة وتشغيل الصالات الرياضية.',
+        moves: [{ x: '50%', y: '50%', t: 0 }]
+      },
+      {
+        id: 'sc2', name: 'فتح المناوبة', duration: 18,
+        banner: 'الخطوة الأولى عند استلام العمل: التوجه لتبويب "مناوبتي"، والضغط على "فتح مناوبة جديدة" وإدخال عهدة الفكة.',
+        moves: [
+          { x: '50%', y: '65%', t: 2, action: 'clickOpen' },
+          { x: '50%', y: '55%', t: 6, action: 'typeStartCash' },
+          { x: '50%', y: '68%', t: 11, action: 'confirmOpen' }
+        ]
+      },
+      {
+        id: 'sc3', name: 'تسجيل عضو جديد', duration: 18,
+        banner: 'لتسجيل مشترك جديد: ننتقل لشاشة الأعضاء، ونضغط "عضو جديد"، نسجل الاسم ورقم الهاتف والباقة ونصدر الإيصال.',
+        moves: [
+          { x: '88%', y: '12%', t: 2, action: 'clickNewMem' },
+          { x: '50%', y: '48%', t: 6, action: 'typeMemDetails' },
+          { x: '50%', y: '68%', t: 11, action: 'confirmSaveMem' }
+        ]
+      },
+      {
+        id: 'sc4', name: 'فحص الباركود', duration: 18,
+        banner: 'عند دخول العضو: نوجه قارئ الباركود لكارت المشترك، ليظهر الكارت باللون الأخضر ويُسجل حضور اليوم فوراً.',
+        moves: [
+          { x: '45%', y: '42%', t: 2, action: 'typeCode' },
+          { x: '72%', y: '42%', t: 6, action: 'clickScan' },
+          { x: '50%', y: '65%', t: 9, action: 'showCard' }
+        ]
+      },
+      {
+        id: 'sc5', name: 'تقفيل المناوبة', duration: 22,
+        banner: 'في نهاية الشيفت: نعد النقدية بالدرج، ونضغط "تقفيل المناوبة"، وندخل المبلغ الفعلي ليحسب النظام أي عجز أو زيادة.',
+        moves: [
+          { x: '88%', y: '12%', t: 2, action: 'clickClose' },
+          { x: '50%', y: '64%', t: 6, action: 'typeActual' },
+          { x: '50%', y: '78%', t: 12, action: 'confirmClose' }
+        ]
+      },
+      {
+        id: 'sc6', name: 'بوت التليجرام', duration: 20,
+        banner: 'يصل إشعار تقفيل الشفت فوراً لهاتف الإدارة عبر التليجرام، ويمكن للإدارة سؤاله عن صافي الأرباح في أي لحظة.',
+        moves: [
+          { x: '50%', y: '50%', t: 2, action: 'showTgMsg' },
+          { x: '35%', y: '88%', t: 8, action: 'clickTgProfit' }
+        ]
+      },
+      {
+        id: 'sc7', name: 'الخاتمة', duration: 12,
+        banner: 'منظومة THE FIRST GROUP — أداء فائق، دقة حسابية، وراحة تامة في إدارة الصالة الرياضية.',
+        moves: [{ x: '50%', y: '60%', t: 2 }]
+      }
+    ];
+
+    const TOTAL_TIME = SCENES.reduce((s, c) => s + c.duration, 0);
+
+    let isPlaying = false;
+    let elapsed = 0;
+    let timer = null;
+    let curIdx = 0;
+
+    function triggerRipple(x, y) {
+      const rip = document.getElementById('mouseRipple');
+      rip.style.left = x;
+      rip.style.top = y;
+      rip.classList.add('active');
+      setTimeout(() => rip.classList.remove('active'), 350);
+    }
+
+    function fmt(sec) {
+      const m = Math.floor(sec / 60);
+      const s = Math.floor(sec % 60);
+      return `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+    }
+
+    function updateTime() {
+      document.getElementById('timerTxt').innerText = `${fmt(elapsed)} / ${fmt(TOTAL_TIME)}`;
+      const p = (elapsed / TOTAL_TIME) * 100;
+      document.getElementById('pBar').style.width = `${p}%`;
+    }
+
+    function renderScene(idx, scTime = 0) {
+      curIdx = idx;
+      const sc = SCENES[idx];
+
+      document.querySelectorAll('.scene').forEach(el => el.classList.remove('active'));
+      const activeEl = document.getElementById(sc.id);
+      if (activeEl) activeEl.classList.add('active');
+
+      document.getElementById('chapterTxt').innerText = `${idx + 1}. ${sc.name}`;
+      document.getElementById('bannerText').innerText = sc.banner;
+
+      document.querySelectorAll('.chip-btn').forEach((b, i) => {
+        b.classList.toggle('active', i === idx);
+      });
+
+      const cursor = document.getElementById('mouseCursor');
+      for (const m of sc.moves) {
+        if (scTime >= m.t) {
+          cursor.style.left = m.x;
+          cursor.style.top = m.y;
+          applyAction(m.action);
+        }
+      }
+    }
+
+    function applyAction(act) {
+      if (!act) return;
+      if (act === 'clickOpen') {
+        triggerRipple('50%', '65%');
+        document.getElementById('uiModalOpenShift').classList.add('show');
+      } else if (act === 'typeStartCash') {
+        document.getElementById('uiInputStartCash').value = '200 ج.م';
+      } else if (act === 'confirmOpen') {
+        triggerRipple('50%', '68%');
+        document.getElementById('uiModalOpenShift').classList.remove('show');
+        const b = document.getElementById('uiBtnOpenShift');
+        if (b) { b.innerText = '✓ المناوبة مفتوحة ونشطة'; b.style.background = '#0284c7'; }
+      } else if (act === 'clickNewMem') {
+        triggerRipple('88%', '12%');
+        document.getElementById('uiModalMember').classList.add('show');
+      } else if (act === 'typeMemDetails') {
+        document.getElementById('uiInpName').value = 'محمد أحمد عبدالله';
+        document.getElementById('uiInpPhone').value = '01012345678';
+      } else if (act === 'confirmSaveMem') {
+        triggerRipple('50%', '68%');
+        document.getElementById('uiModalMember').classList.remove('show');
+      } else if (act === 'typeCode') {
+        document.getElementById('uiScanInput').value = '#1042';
+      } else if (act === 'clickScan') {
+        triggerRipple('72%', '42%');
+      } else if (act === 'showCard') {
+        document.getElementById('uiScanCard').style.display = 'block';
+      } else if (act === 'clickClose') {
+        triggerRipple('88%', '12%');
+      } else if (act === 'typeActual') {
+        document.getElementById('uiInpActualCash').value = '650 ج.م';
+        document.getElementById('uiDiffBadge').style.display = 'block';
+      } else if (act === 'confirmClose') {
+        triggerRipple('50%', '78%');
+        const b = document.getElementById('uiBtnConfirmClose');
+        if (b) { b.innerText = '✓ تم تقفيل المناوبة بنجاح'; b.style.background = '#10b981'; }
+      } else if (act === 'showTgMsg') {
+        document.getElementById('uiTgShiftNotice').style.display = 'block';
+      } else if (act === 'clickTgProfit') {
+        triggerRipple('35%', '88%');
+        document.getElementById('uiTgProfitReply').style.display = 'block';
+      }
+    }
+
+    function tick() {
+      elapsed += 0.25;
+      if (elapsed >= TOTAL_TIME) {
+        pause();
+        elapsed = TOTAL_TIME;
+        updateTime();
+        return;
+      }
+      updateTime();
+
+      let accum = 0;
+      for (let i = 0; i < SCENES.length; i++) {
+        if (elapsed >= accum && elapsed < accum + SCENES[i].duration) {
+          renderScene(i, elapsed - accum);
+          break;
+        }
+        accum += SCENES[i].duration;
+      }
+    }
+
+    function play() {
+      isPlaying = true;
+      document.getElementById('playTxt').innerText = '⏸ إيقاف مؤقت';
+      timer = setInterval(tick, 250);
+    }
+
+    function pause() {
+      isPlaying = false;
+      document.getElementById('playTxt').innerText = '▶ تشغيل';
+      if (timer) clearInterval(timer);
+    }
+
+    function togglePlay() {
+      if (isPlaying) pause();
+      else play();
+    }
+
+    function startVideo() {
+      document.getElementById('startOverlay').style.display = 'none';
+      renderScene(0, 0);
+      play();
+    }
+
+    function restartVideo() {
+      pause();
+      elapsed = 0;
+      updateTime();
+      renderScene(0, 0);
+      play();
+    }
+
+    function jumpToScene(idx) {
+      let accum = 0;
+      for (let i = 0; i < idx; i++) accum += SCENES[i].duration;
+      elapsed = accum;
+      updateTime();
+      renderScene(idx, 0);
+      if (!isPlaying) play();
+    }
+
+    function nextStep() {
+      if (curIdx + 1 < SCENES.length) jumpToScene(curIdx + 1);
+    }
+
+    function prevStep() {
+      if (curIdx > 0) jumpToScene(curIdx - 1);
+      else jumpToScene(0);
+    }
+
+    function seekByClick(e) {
+      const bar = e.currentTarget;
+      const rect = bar.getBoundingClientRect();
+      const pct = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+      elapsed = pct * TOTAL_TIME;
+      updateTime();
+      
+      let accum = 0;
+      for (let i = 0; i < SCENES.length; i++) {
+        if (elapsed >= accum && elapsed < accum + SCENES[i].duration) {
+          renderScene(i, elapsed - accum);
+          break;
+        }
+        accum += SCENES[i].duration;
+      }
+    }
+
+    function toggleFullscreen() {
+      const el = document.getElementById('stage');
+      if (!document.fullscreenElement) {
+        el.requestFullscreen().catch(() => {});
+      } else {
+        document.exitFullscreen();
+      }
+    }
+
+    // Initialize display on load
+    window.addEventListener('DOMContentLoaded', () => {
+      renderScene(0, 0);
+      updateTime();
+    });
+  </script>
+</body>
+</html>
