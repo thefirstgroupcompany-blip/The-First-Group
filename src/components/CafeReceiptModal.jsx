@@ -1,131 +1,185 @@
-import React from "react";
+import React, { useState } from "react";
 import { Modal, Button } from "./ui";
 import { formatCurrency, formatDateTime } from "../utils/constants";
+import { printThermalReceipt } from "../utils/thermalPrinter";
+import { Printer, Check, Receipt } from "lucide-react";
 
-export default function CafeReceiptModal({ isOpen, onClose, sale, orgName = "TFG | CAFE" }) {
+export default function CafeReceiptModal({ isOpen, onClose, sale, orgName = "THE FIRST GROUP" }) {
+  const [paperWidth, setPaperWidth] = useState("80mm");
+
   if (!isOpen || !sale) return null;
 
-  const handlePrint = () => {
-    const itemsHtml = (sale.items || []).map(itm =>
-      `<tr>
-        <td style="padding:3px 0;font-weight:600;">${itm.name || ""}</td>
-        <td style="padding:3px 0;text-align:center;">${itm.qty} x ${itm.unitPrice}</td>
-        <td style="padding:3px 0;text-align:left;font-weight:700;">${(itm.qty * itm.unitPrice).toLocaleString()} ج.م</td>
-       </tr>`
-    ).join("");
-
-    const payMethodLabel =
-      sale.paymentMethod === "cash" ? "نقدي" :
-      sale.paymentMethod === "visa" ? "فيزا" :
-      sale.paymentMethod === "vodafone_cash" ? "فودافون كاش" : "انستاباي";
-
-    const now = new Date().toLocaleString("ar-EG-u-nu-latn", { timeZone: "Africa/Cairo" });
-
-    const html = `<!DOCTYPE html>
-<html lang="ar" dir="rtl">
-<head>
-  <meta charset="UTF-8">
-  <title>ايصال كافيه</title>
-  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
-  <style>
-    * { margin:0;padding:0;box-sizing:border-box; }
-    body { font-family:"Cairo",monospace;font-size:12px;background:#fff;color:#000;width:80mm;margin:0 auto;padding:5mm; }
-    .c { text-align:center; }
-    h2 { font-size:15px;font-weight:900; }
-    .s { font-size:10px;color:#555;margin:2px 0; }
-    .d { border-top:1px dashed #000;margin:6px 0; }
-    table { width:100%;border-collapse:collapse; }
-    th { font-size:10px;font-weight:700;border-bottom:1px solid #ccc;padding-bottom:3px; }
-    td { vertical-align:top; }
-    .tr td { font-size:14px;font-weight:900;padding-top:6px; }
-    .me td { font-size:10px;color:#444;padding:1px 0; }
-    .ft { text-align:center;font-size:10px;color:#666;padding-top:8px; }
-    @page { size:80mm auto;margin:0; }
-    @media print { body { width:80mm; } }
-  </style>
-</head>
-<body>
-  <div class="c">
-    <h2>TFG | CAFE</h2>
-    <p class="s">المشروبات والضيافة</p>
-    <p class="s">${now}</p>
-    <p class="s">رقم الطلب: #${sale.id || Date.now().toString().slice(-4)}</p>
-  </div>
-  <div class="d"></div>
-  <table>
-    <thead><tr><th style="text-align:right">الصنف</th><th style="text-align:center">ك x س</th><th style="text-align:left">الإجمالي</th></tr></thead>
-    <tbody>
-      ${itemsHtml}
-      <tr><td colspan="3"><div class="d"></div></td></tr>
-      <tr class="tr"><td colspan="2">المجموع الكلي:</td><td style="text-align:left">${Number(sale.total||0).toLocaleString()} ج.م</td></tr>
-      <tr class="me"><td colspan="2">طريقة الدفع:</td><td style="text-align:left">${payMethodLabel}</td></tr>
-      ${sale.buyerName ? `<tr class="me"><td colspan="2">الزبون:</td><td style="text-align:left">${sale.buyerName}</td></tr>` : ""}
-    </tbody>
-  </table>
-  <div class="d"></div>
-  <div class="ft">نتمنى لكم وقتا ممتعا ومشروبا هنيئا!</div>
-  <script>window.onload=function(){window.print();setTimeout(function(){window.close();},800);};</script>
-</body>
-</html>`;
-
-    const popup = window.open("", "_blank", "width=340,height=520,toolbar=0,scrollbars=0,status=0");
-    if (!popup) {
-      alert("يرجى السماح بالنوافذ المنبثقة في المتصفح لتتمكن من الطباعة");
-      return;
-    }
-    popup.document.write(html);
-    popup.document.close();
+  const handlePrint = (width = paperWidth) => {
+    printThermalReceipt({
+      type: 'cafe',
+      paperWidth: width,
+      data: {
+        orderId: sale.id || Date.now().toString().slice(-4),
+        items: sale.items || [],
+        subtotal: sale.total,
+        discount: sale.discount || 0,
+        total: sale.total,
+        paymentMethod: sale.paymentMethod,
+        cashierName: sale.cashierName || sale.baristaName,
+        buyerName: sale.buyerName
+      },
+      orgName
+    });
   };
 
+  const payMethodLabel =
+    sale.paymentMethod === "cash" ? "نقدي (كاش)" :
+    sale.paymentMethod === "visa" ? "فيزا / بطاقة" :
+    sale.paymentMethod === "wallet_credit" ? "محفظة العضو" :
+    sale.paymentMethod === "vodafone_cash" ? "فودافون كاش" : "انستاباي";
+
   return (
-    <Modal open={true} onClose={onClose} title="إيصال طلب TFG | CAFE (بون استلام)" size="sm">
-      <div style={{ display: "flex", flexDirection: "column", gap: 14, alignItems: "center" }}>
+    <Modal open={true} onClose={onClose} title="🖨️ طباعة إيصال كافيه حراري (Thermal POS)" size="sm">
+      <div style={{ display: "flex", flexDirection: "column", gap: 16, alignItems: "center", direction: "rtl" }}>
+        
+        {/* Paper Width Selector */}
         <div style={{
-          width: "100%", maxWidth: 300, background: "#ffffff", color: "#000000",
-          padding: "16px 14px", borderRadius: 8, fontFamily: "monospace",
-          fontSize: 12, lineHeight: 1.4, border: "1px dashed #94a3b8"
+          display: "flex",
+          alignItems: "center",
+          gap: 10,
+          background: "rgba(255, 255, 255, 0.05)",
+          padding: "6px 12px",
+          borderRadius: 12,
+          border: "1px solid rgba(255, 255, 255, 0.1)",
+          width: "100%",
+          justifyContent: "space-between"
+        }}>
+          <span style={{ fontSize: 12, fontWeight: 700, color: "#94a3b8" }}>حجم بكرة الورق:</span>
+          <div style={{ display: "flex", gap: 8 }}>
+            <button
+              type="button"
+              onClick={() => setPaperWidth("80mm")}
+              style={{
+                padding: "5px 12px",
+                borderRadius: 8,
+                fontSize: 11.5,
+                fontWeight: 800,
+                cursor: "pointer",
+                border: "none",
+                background: paperWidth === "80mm" ? "#0284c7" : "rgba(255,255,255,0.06)",
+                color: "#ffffff"
+              }}
+            >
+              80 مم (قياسي)
+            </button>
+            <button
+              type="button"
+              onClick={() => setPaperWidth("58mm")}
+              style={{
+                padding: "5px 12px",
+                borderRadius: 8,
+                fontSize: 11.5,
+                fontWeight: 800,
+                cursor: "pointer",
+                border: "none",
+                background: paperWidth === "58mm" ? "#0284c7" : "rgba(255,255,255,0.06)",
+                color: "#ffffff"
+              }}
+            >
+              58 مم (صغير)
+            </button>
+          </div>
+        </div>
+
+        {/* Receipt Simulation Preview */}
+        <div style={{
+          width: "100%",
+          maxWidth: paperWidth === "58mm" ? 240 : 310,
+          background: "#ffffff",
+          color: "#000000",
+          padding: "16px 14px",
+          borderRadius: 8,
+          fontFamily: "monospace",
+          fontSize: paperWidth === "58mm" ? 10.5 : 12,
+          lineHeight: 1.4,
+          border: "2px dashed #64748b",
+          boxShadow: "0 10px 25px rgba(0,0,0,0.5)",
+          transition: "max-width 0.2s ease"
         }}>
           <div style={{ textAlign: "center", borderBottom: "1px dashed #000", paddingBottom: 8, marginBottom: 8 }}>
-            <h3 style={{ fontSize: 16, fontWeight: 900, margin: 0, color: "#000" }}>TFG | CAFE</h3>
-            <p style={{ fontSize: 11, margin: "2px 0 0", color: "#444" }}>المشروبات والضيافة</p>
-            <p style={{ fontSize: 10, margin: "2px 0 0", color: "#666" }}>{formatDateTime(new Date())}</p>
-            <p style={{ fontSize: 10, margin: "2px 0 0", color: "#666" }}>{'رقم الطلب: #' + (sale.id || Date.now().toString().slice(-4))}</p>
+            <h3 style={{ fontSize: paperWidth === "58mm" ? 14 : 16, fontWeight: 900, margin: 0, color: "#000" }}>{orgName}</h3>
+            <p style={{ fontSize: 10, margin: "2px 0 0", color: "#444" }}>☕ TFG | CAFE</p>
+            <p style={{ fontSize: 9.5, margin: "2px 0 0", color: "#666" }}>{formatDateTime(new Date())}</p>
+            <p style={{ fontSize: 10, margin: "2px 0 0", fontWeight: 800 }}>{'رقم الطلب: #' + (sale.id || Date.now().toString().slice(-4))}</p>
           </div>
+
           <div style={{ marginBottom: 8 }}>
-            <div style={{ display: "flex", justifyContent: "space-between", fontSize: 11, fontWeight: 700, borderBottom: "1px solid #ddd", paddingBottom: 4 }}>
+            <div style={{ display: "flex", justifyContent: "space-between", fontSize: 10.5, fontWeight: 800, borderBottom: "1px solid #ddd", paddingBottom: 4 }}>
               <span>الصنف</span><span>الكمية x السعر</span><span>الإجمالي</span>
             </div>
             {(sale.items || []).map((itm, idx) => (
-              <div key={idx} style={{ display: "flex", justifyContent: "space-between", padding: "3px 0", fontSize: 11 }}>
+              <div key={idx} style={{ display: "flex", justifyContent: "space-between", padding: "3px 0", fontSize: 10.5 }}>
                 <span style={{ fontWeight: 600 }}>{itm.name}</span>
                 <span>{itm.qty} x {itm.unitPrice}</span>
-                <span style={{ fontWeight: 700 }}>{itm.qty * itm.unitPrice} ج.م</span>
+                <span style={{ fontWeight: 800 }}>{(itm.qty * itm.unitPrice).toFixed(1)} ج.م</span>
               </div>
             ))}
           </div>
+
           <div style={{ borderTop: "1px dashed #000", paddingTop: 6, display: "flex", flexDirection: "column", gap: 2 }}>
-            <div style={{ display: "flex", justifyContent: "space-between", fontSize: 14, fontWeight: 900 }}>
+            <div style={{ display: "flex", justifyContent: "space-between", fontSize: 13, fontWeight: 900 }}>
               <span>المجموع الكلي:</span><span>{formatCurrency(sale.total)}</span>
             </div>
-            <div style={{ display: "flex", justifyContent: "space-between", fontSize: 10, color: "#444" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", fontSize: 9.5, color: "#444" }}>
               <span>طريقة الدفع:</span>
-              <span>{sale.paymentMethod === "cash" ? "نقدي" : sale.paymentMethod === "visa" ? "فيزا" : sale.paymentMethod === "vodafone_cash" ? "فودافون" : "انستاباي"}</span>
+              <span style={{ fontWeight: 700 }}>{payMethodLabel}</span>
             </div>
             {sale.buyerName && (
-              <div style={{ display: "flex", justifyContent: "space-between", fontSize: 10, color: "#444" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", fontSize: 9.5, color: "#444" }}>
                 <span>الزبون:</span><span>{sale.buyerName}</span>
               </div>
             )}
           </div>
-          <div style={{ textAlign: "center", borderTop: "1px dashed #000", paddingTop: 6, marginTop: 8, fontSize: 10, color: "#666" }}>
-            نتمنى لكم وقتا ممتعا ومشروبا هنيئا!
+
+          <div style={{ textAlign: "center", borderTop: "1px dashed #000", paddingTop: 6, marginTop: 8, fontSize: 9.5, color: "#444" }}>
+            شكراً لزيارتكم ونتمنى لكم يوماً سعيداً!
           </div>
         </div>
-        <div style={{ display: "flex", gap: 10, width: "100%", justifyContent: "flex-end", marginTop: 4 }}>
-          <Button type="button" variant="ghost" onClick={onClose}>اغلاق</Button>
-          <Button type="button" variant="primary" onClick={handlePrint} style={{ background: "linear-gradient(135deg, #1d4ed8, #3b82f6)" }}>
-            طباعة البون الفوري
+
+        {/* Action Buttons */}
+        <div style={{ display: "flex", gap: 10, width: "100%", justifyContent: "space-between", marginTop: 4 }}>
+          <Button type="button" variant="ghost" onClick={onClose}>
+            إغلاق
           </Button>
+
+          <div style={{ display: "flex", gap: 8 }}>
+            <Button
+              type="button"
+              variant="primary"
+              onClick={() => handlePrint("80mm")}
+              style={{
+                background: "linear-gradient(135deg, #0284c7, #0ea5e9)",
+                fontWeight: 800,
+                display: "flex",
+                alignItems: "center",
+                gap: 6
+              }}
+            >
+              <Printer size={15} />
+              <span>طباعة حراري 80mm</span>
+            </Button>
+            <Button
+              type="button"
+              variant="secondary"
+              onClick={() => handlePrint("58mm")}
+              style={{
+                background: "rgba(255, 255, 255, 0.08)",
+                color: "#ffffff",
+                fontWeight: 700,
+                display: "flex",
+                alignItems: "center",
+                gap: 6
+              }}
+            >
+              <Printer size={14} />
+              <span>58mm</span>
+            </Button>
+          </div>
         </div>
       </div>
     </Modal>

@@ -3,6 +3,8 @@ import { getTickets, addTicket, updateTicket, deleteTicket, sellTicket, getTicke
 import { Card, Button, Input, Modal, ConfirmDialog, EmptyState, Badge } from '../../../components/ui';
 import { formatCurrency, formatDateTime } from '../../../utils/constants';
 import { useAuth } from '../../../contexts/AuthContext';
+import { printThermalReceipt } from '../../../utils/thermalPrinter';
+import { Printer } from 'lucide-react';
 
 export default function TicketsTab({ shiftId, employeeId, isEmployee = false }) {
   const { user } = useAuth();
@@ -20,6 +22,7 @@ export default function TicketsTab({ shiftId, employeeId, isEmployee = false }) 
   const [buyerPhone, setBuyerPhone] = useState('');
   const [loading, setLoading] = useState(false);
   const [soldMsg, setSoldMsg] = useState('');
+  const [lastSoldTicketData, setLastSoldTicketData] = useState(null);
   
   const [historyModal, setHistoryModal] = useState(false);
   const [ticketSales, setTicketSales] = useState([]);
@@ -61,7 +64,7 @@ export default function TicketsTab({ shiftId, employeeId, isEmployee = false }) 
     setLoading(true);
     try {
       const totalAmount = Number(sellModal.price) * Number(quantity);
-      await sellTicket(
+      const res = await sellTicket(
         sellModal.id,
         sellModal.name,
         sellModal.price,
@@ -72,6 +75,15 @@ export default function TicketsTab({ shiftId, employeeId, isEmployee = false }) 
         buyerName,
         buyerPhone
       );
+      setLastSoldTicketData({
+        ticketId: res?.id || `TK-${Date.now().toString().slice(-6)}`,
+        ticketType: sellModal.name,
+        price: totalAmount,
+        quantity,
+        clientName: buyerName || 'عميل كريم',
+        cashierName: user?.name || 'الاستقبال',
+        date: new Date().toLocaleDateString('ar-EG-u-nu-latn')
+      });
       setSoldMsg("✅ تم بيع " + quantity + " تذكرة (" + sellModal.name + ") بإجمالي " + formatCurrency(totalAmount) + " [" + (paymentMethod === 'cash' ? 'نقدي 💵' : paymentMethod === 'visa' ? 'فيزا 💳' : paymentMethod === 'vodafone_cash' ? 'فودافون كاش 📱' : 'إنستاباي ⚡') + "]");
       setQuantity('1');
       setBuyerName('');
@@ -117,10 +129,38 @@ export default function TicketsTab({ shiftId, employeeId, isEmployee = false }) 
         <div style={{
           marginBottom: 16, padding: '12px 18px', borderRadius: 12,
           background: 'rgba(16, 185, 129, 0.15)', border: '1px solid rgba(16, 185, 129, 0.3)',
-          color: '#6ee7b7', fontSize: 14, fontWeight: 600, display: 'flex', justifyContent: 'space-between', alignItems: 'center'
+          color: '#6ee7b7', fontSize: 14, fontWeight: 600, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 10
         }}>
-          <span>{soldMsg}</span>
-          <button onClick={() => setSoldMsg('')} style={{ background: 'none', border: 'none', color: '#6ee7b7', fontSize: 20, cursor: 'pointer' }}>&times;</button>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 14, flexWrap: 'wrap' }}>
+            <span>{soldMsg}</span>
+            {lastSoldTicketData && (
+              <div style={{ display: 'flex', gap: 6 }}>
+                <button
+                  type="button"
+                  onClick={() => printThermalReceipt({ type: 'ticket', paperWidth: '80mm', data: lastSoldTicketData })}
+                  style={{
+                    background: '#0284c7', color: '#fff', border: 'none', borderRadius: 8,
+                    padding: '4px 10px', fontSize: 12, fontWeight: 800, cursor: 'pointer',
+                    display: 'flex', alignItems: 'center', gap: 4
+                  }}
+                >
+                  <Printer size={13} />
+                  <span>طباعة بون حراري (80mm)</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => printThermalReceipt({ type: 'ticket', paperWidth: '58mm', data: lastSoldTicketData })}
+                  style={{
+                    background: 'rgba(255,255,255,0.15)', color: '#fff', border: 'none', borderRadius: 8,
+                    padding: '4px 8px', fontSize: 11.5, fontWeight: 700, cursor: 'pointer'
+                  }}
+                >
+                  58mm
+                </button>
+              </div>
+            )}
+          </div>
+          <button onClick={() => { setSoldMsg(''); setLastSoldTicketData(null); }} style={{ background: 'none', border: 'none', color: '#6ee7b7', fontSize: 20, cursor: 'pointer' }}>&times;</button>
         </div>
       )}
 
@@ -267,6 +307,7 @@ export default function TicketsTab({ shiftId, employeeId, isEmployee = false }) 
                   <th style={{ padding: '10px' }}>طريقة الدفع</th>
                   <th style={{ padding: '10px' }}>العميل</th>
                   <th style={{ padding: '10px' }}>التاريخ</th>
+                  <th style={{ padding: '10px', textAlign: 'center' }}>طباعة حراري</th>
                   {!isEmployee && <th style={{ padding: '10px' }}>حذف</th>}
                 </tr>
               </thead>
@@ -284,6 +325,41 @@ export default function TicketsTab({ shiftId, employeeId, isEmployee = false }) 
                     <td style={{ padding: '10px', color: '#cbd5e1' }}>{s.buyerName || '—'}</td>
                     <td style={{ padding: '10px', color: '#94a3b8', fontSize: 12 }}>
                       {s.date ? formatDateTime(s.date) : '—'}
+                    </td>
+                    <td style={{ padding: '10px', textAlign: 'center' }}>
+                      <button
+                        type="button"
+                        onClick={() => printThermalReceipt({
+                          type: 'ticket',
+                          paperWidth: '80mm',
+                          data: {
+                            ticketId: s.id,
+                            ticketType: s.ticketName,
+                            price: s.total,
+                            quantity: s.quantity,
+                            clientName: s.buyerName || 'عميل كريم',
+                            cashierName: user?.name || 'الاستقبال',
+                            date: s.date ? (s.date.toDate ? s.date.toDate().toLocaleDateString('ar-EG-u-nu-latn') : new Date(s.date).toLocaleDateString('ar-EG-u-nu-latn')) : '—'
+                          }
+                        })}
+                        style={{
+                          background: 'rgba(56, 189, 248, 0.12)',
+                          border: '1px solid rgba(56, 189, 248, 0.35)',
+                          color: '#38bdf8',
+                          borderRadius: 8,
+                          padding: '4px 8px',
+                          fontSize: 11.5,
+                          fontWeight: 700,
+                          cursor: 'pointer',
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: 4
+                        }}
+                        title="طباعة بون دخول حراري 80mm"
+                      >
+                        <Printer size={12} />
+                        <span>بون 80mm</span>
+                      </button>
                     </td>
                     {!isEmployee && (
                       <td style={{ padding: '10px' }}>

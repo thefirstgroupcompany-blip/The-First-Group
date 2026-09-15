@@ -40,22 +40,51 @@ export const AuthProvider = ({ children }) => {
 
   const logout = () => {
     try {
+      const currentSessionId = sessionStorage.getItem('tfg_session_id');
+      if (currentSessionId) {
+        import('../services/sessionService').then(({ terminateSession }) => {
+          terminateSession(currentSessionId, 'تسجيل خروج طبيعي');
+        }).catch(() => {});
+      }
       sessionStorage.removeItem('ms_user');
       localStorage.removeItem('ms_user');
+      sessionStorage.removeItem('tfg_session_id');
     } catch (e) {}
     setUser(null);
   };
 
-  // Live session invalidation: Listen for account status changes in realtime
+  // Live session registration, heartbeat, and remote kill watcher
   useEffect(() => {
     if (!user?.id) return;
-    let unsub = null;
+    let unsubUser = null;
+    let unsubSession = null;
+    let heartbeatInterval = null;
+
+    import('../services/sessionService').then(({ registerActiveSession, sendSessionHeartbeat, watchSessionStatus, getOrCreateSessionId }) => {
+      const sessionId = getOrCreateSessionId();
+      registerActiveSession(user);
+
+      // 1. Listen for remote termination by Admin
+      unsubSession = watchSessionStatus(sessionId, (termData) => {
+        logout();
+        alert('⚠️ تم إنهاء هذه الجلسة عن بُعد من قِبل إدارة النظام لأسباب أمنية (' + (termData.terminatedBy || 'المدير') + ').');
+        window.location.replace('/');
+      });
+
+      // 2. Periodic heartbeat every 45 seconds
+      heartbeatInterval = setInterval(() => {
+        sendSessionHeartbeat(sessionId);
+      }, 45000);
+    }).catch(err => {
+      console.warn('[SessionService] Init failed:', err);
+    });
+
+    // 3. Live user account status watcher
     try {
       import('../firebase').then(({ db }) => {
         import('firebase/firestore').then(({ doc, onSnapshot }) => {
-          unsub = onSnapshot(doc(db, 'users', user.id), (snap) => {
+          unsubUser = onSnapshot(doc(db, 'users', user.id), (snap) => {
             if (!snap.exists()) {
-              // User was deleted from system -> revoke session immediately
               logout();
               alert('تم حذف هذا الحساب من قِبل إدارة النظام.');
               window.location.replace('/');
@@ -63,7 +92,6 @@ export const AuthProvider = ({ children }) => {
             }
             const data = snap.data();
             if (data.status === 'disabled') {
-              // User was disabled -> revoke session immediately
               logout();
               alert('تم تعطيل هذا الحساب حالياً من قِبل إدارة النظام.');
               window.location.replace('/');
@@ -76,7 +104,9 @@ export const AuthProvider = ({ children }) => {
     } catch (_) {}
 
     return () => {
-      if (unsub) unsub();
+      if (unsubUser) unsubUser();
+      if (unsubSession) unsubSession();
+      if (heartbeatInterval) clearInterval(heartbeatInterval);
     };
   }, [user?.id]);
 

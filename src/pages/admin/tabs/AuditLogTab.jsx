@@ -3,6 +3,8 @@ import { getAuditLogs, getEmployees } from '../../../services/db';
 import { Card, StatCard, EmptyState, Button, Input, Select, Badge } from '../../../components/ui';
 import { formatCurrency, formatDateTime, formatDate, getCurrentMonth, getMonthLabel } from '../../../utils/constants';
 import { exportToExcel } from '../../../utils/excelExport';
+import LiveSessionsModal from '../../../components/LiveSessionsModal';
+import { Radio } from 'lucide-react';
 
 export default function AuditLogTab() {
   const [logs, setLogs] = useState([]);
@@ -12,6 +14,7 @@ export default function AuditLogTab() {
   const [datePreset, setDatePreset] = useState('today'); // 'today', 'this_week', 'this_month', 'all'
   const [searchQuery, setSearchQuery] = useState('');
   const [displayLimit, setDisplayLimit] = useState(25);
+  const [radarOpen, setRadarOpen] = useState(false);
 
   useEffect(() => {
     const unsubL = getAuditLogs(setLogs);
@@ -115,9 +118,27 @@ export default function AuditLogTab() {
           </p>
         </div>
 
-        <Button size="sm" onClick={handleExportAuditExcel} style={{ background: 'linear-gradient(135deg, #059669, #10b981)', color: '#fff', fontWeight: 800 }}>
-          📥 تصدير السجل Excel
-        </Button>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          <Button 
+            size="sm" 
+            onClick={() => setRadarOpen(true)} 
+            style={{ 
+              background: 'linear-gradient(135deg, #0284c7, #0ea5e9)', 
+              color: '#fff', 
+              fontWeight: 800,
+              display: 'flex',
+              alignItems: 'center',
+              gap: 6
+            }}
+          >
+            <Radio size={14} className="animate-pulse" />
+            <span>رادار الأجهزة المتصلة الحية</span>
+          </Button>
+
+          <Button size="sm" onClick={handleExportAuditExcel} style={{ background: 'linear-gradient(135deg, #059669, #10b981)', color: '#fff', fontWeight: 800 }}>
+            📥 تصدير السجل Excel
+          </Button>
+        </div>
       </div>
 
       {/* KPI Stats Cards */}
@@ -284,6 +305,12 @@ export default function AuditLogTab() {
           </div>
         </Card>
       )}
+
+      {/* Live Security Radar Modal */}
+      <LiveSessionsModal
+        isOpen={radarOpen}
+        onClose={() => setRadarOpen(false)}
+      />
     </div>
   );
 }

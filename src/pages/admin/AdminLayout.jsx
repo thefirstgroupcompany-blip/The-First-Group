@@ -14,8 +14,10 @@ import {
   TrendingUp, Gift, MessageSquare, ShieldCheck, Banknote, Settings,
   Bell, BellRing, Printer, LogOut, Menu, X, Phone, MessageCircle,
   CheckCircle2, Headphones, KeyRound, Video, BookOpen, ChevronDown, User,
-  ChevronRight, ChevronLeft, ClipboardCheck, PlayCircle
+  ChevronRight, ChevronLeft, ClipboardCheck, PlayCircle, Radio
 } from 'lucide-react';
+import LiveSessionsModal from '../../components/LiveSessionsModal';
+import { watchActiveSessions } from '../../services/sessionService';
 
 const navGroups = [
   {
@@ -179,15 +181,22 @@ export default function AdminLayout() {
   const [shiftPayments, setShiftPayments] = useState([]);
   const [shiftTickets, setShiftTickets] = useState([]);
   const [clients, setClients] = useState([]);
+  const [liveSessionsModalOpen, setLiveSessionsModalOpen] = useState(false);
+  const [onlineDevicesCount, setOnlineDevicesCount] = useState(1);
 
   useEffect(() => {
     const unsubShifts = getAllShifts(all => {
       setOpenShifts(all.filter(s => s.status === 'open'));
     });
     const unsubClients = getClients(setClients);
+    const unsubSessions = watchActiveSessions(list => {
+      const online = list.filter(s => s.isOnline);
+      setOnlineDevicesCount(online.length || 1);
+    });
     return () => {
       unsubShifts && unsubShifts();
       unsubClients && unsubClients();
+      unsubSessions && unsubSessions();
     };
   }, []);
 
@@ -670,6 +679,38 @@ export default function AdminLayout() {
           gap: 8,
           flexShrink: 0
         }}>
+          {/* Live Security Radar Button */}
+          <button
+            onClick={() => setLiveSessionsModalOpen(true)}
+            className="btn btn-ghost btn-sm no-print"
+            style={{
+              position: 'relative',
+              padding: '6px 11px',
+              borderRadius: 10,
+              background: onlineDevicesCount > 1 ? 'rgba(56, 189, 248, 0.16)' : 'rgba(255,255,255,0.04)',
+              border: onlineDevicesCount > 1 ? '1.5px solid rgba(56, 189, 248, 0.5)' : '1px solid rgba(255,255,255,0.08)',
+              color: onlineDevicesCount > 1 ? '#38bdf8' : 'var(--text-secondary)',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 6
+            }}
+            title="رادار الأمان والأجهزة المتصلة الحية"
+          >
+            <Radio size={16} className={onlineDevicesCount > 1 ? "animate-pulse" : ""} />
+            <span className="hidden-on-mobile" style={{ fontSize: 11, fontWeight: 700 }}>الأجهزة الحية</span>
+            <span style={{
+              background: onlineDevicesCount > 1 ? '#0284c7' : 'rgba(255,255,255,0.15)',
+              color: '#ffffff',
+              borderRadius: '999px',
+              padding: '1px 6px',
+              fontSize: 10.5,
+              fontWeight: 900
+            }}>
+              {onlineDevicesCount}
+            </span>
+          </button>
+
           {/* Customer Service Requests Bell */}
           <button
             onClick={() => setCsModalOpen(true)}
@@ -1104,6 +1145,12 @@ export default function AdminLayout() {
           setHandoverModalOpen(false);
           window.showToast?.('✅ تم تقفيل وتسليم المناوبة بنجاح وتوليد محضر الاستلام المالي', 'success');
         }}
+      />
+
+      {/* Live Security Radar & Device Session Manager Modal */}
+      <LiveSessionsModal
+        isOpen={liveSessionsModalOpen}
+        onClose={() => setLiveSessionsModalOpen(false)}
       />
 
       <style>{`

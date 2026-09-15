@@ -3,6 +3,7 @@ import { getVouchers, addVoucher, deleteVoucher, getAllShifts, getSystemInfo } f
 import { Card, StatCard, EmptyState, Button, Input, Modal, Badge, ConfirmDialog } from '../../../components/ui';
 import { formatCurrency, formatDate } from '../../../utils/constants';
 import { exportToExcel } from '../../../utils/excelExport';
+import { printThermalReceipt } from '../../../utils/thermalPrinter';
 
 export default function VouchersTab({ shiftId, employeeId, isEmployee = false }) {
   const [vouchers, setVouchers] = useState([]);
@@ -69,6 +70,23 @@ export default function VouchersTab({ shiftId, employeeId, isEmployee = false })
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleThermalPrint = (v, paperWidth = '80mm') => {
+    printThermalReceipt({
+      type: 'voucher',
+      paperWidth,
+      data: {
+        voucherNo: v.voucherNo,
+        voucherType: v.type,
+        beneficiary: v.personName,
+        amount: v.amount,
+        category: v.category,
+        notes: v.reason || v.notes,
+        cashierName: v.employeeName || v.actorName || 'الخزينة'
+      },
+      orgName: systemInfo?.name || 'THE FIRST GROUP'
+    });
   };
 
   const handlePrint = (v) => {
@@ -235,8 +253,11 @@ export default function VouchersTab({ shiftId, employeeId, isEmployee = false })
                       </td>
                       <td style={{ padding: '12px', textAlign: 'center' }}>
                         <div style={{ display: 'inline-flex', gap: 6 }}>
-                          <Button size="sm" variant="ghost" onClick={() => handlePrint(v)} style={{ color: '#60a5fa' }}>
-                            🖨️ طباعة
+                          <Button size="sm" variant="ghost" onClick={() => handlePrint(v)} style={{ color: '#60a5fa' }} title="طباعة سند رسمي A4">
+                            🖨️ A4
+                          </Button>
+                          <Button size="sm" variant="ghost" onClick={() => handleThermalPrint(v, '80mm')} style={{ color: '#38bdf8', background: 'rgba(56, 189, 248, 0.1)' }} title="طباعة إيصال حراري 80mm">
+                            🧾 حراري
                           </Button>
                           <Button size="sm" variant="danger" onClick={() => setDeleteId(v.id)}>
                             حذف
