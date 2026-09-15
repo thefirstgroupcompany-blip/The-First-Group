@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import {
   Users, Package, BadgeDollarSign, ArrowDownCircle, TrendingUp, Clock,
-  Bot, Settings, Building2, Coffee, CheckCircle2, AlertCircle
+  Settings, Building2, Coffee, CheckCircle2, AlertCircle
 } from 'lucide-react';
-import { getClients, getPackages, getAllShifts, getAllPayments, getTicketSales, getAdminRevenues, getAdminExpenses, getCafeShifts, getWhatsAppBotSettings, getAllSalaries } from '../../../services/db';
+import { getClients, getPackages, getAllShifts, getAllPayments, getTicketSales, getAdminRevenues, getAdminExpenses, getCafeShifts, getAllSalaries } from '../../../services/db';
 import OccupancyMeterWidget from '../../../components/OccupancyMeterWidget';
 import { StatCard, Card, Badge } from '../../../components/ui';
 import { formatCurrency, getCurrentMonth } from '../../../utils/constants';
@@ -13,7 +13,6 @@ export default function AdminDashboard({ onNavigateTab }) {
   const [packages, setPackages] = useState([]);
   const [shifts, setShifts] = useState([]);
   const [cafeShifts, setCafeShifts] = useState([]);
-  const [botSettings, setBotSettings] = useState({ enabled: true });
   const [payments, setPayments] = useState([]);
   const [tickets, setTickets] = useState([]);
   const [adminRevenues, setAdminRevenues] = useState([]);
@@ -25,7 +24,6 @@ export default function AdminDashboard({ onNavigateTab }) {
     const unsubP = getPackages(setPackages);
     const unsubS = getAllShifts(setShifts);
     const unsubCafe = getCafeShifts(setCafeShifts);
-    const unsubBot = getWhatsAppBotSettings(setBotSettings);
     const unsubPay = getAllPayments(setPayments);
     const unsubT = getTicketSales(setTickets);
     const unsubA = getAdminRevenues(setAdminRevenues);
@@ -36,7 +34,6 @@ export default function AdminDashboard({ onNavigateTab }) {
       unsubP && unsubP();
       unsubS && unsubS();
       unsubCafe && unsubCafe();
-      unsubBot && unsubBot();
       unsubPay && unsubPay();
       unsubT && unsubT();
       unsubA && unsubA();
@@ -140,74 +137,8 @@ export default function AdminDashboard({ onNavigateTab }) {
       {/* Bento Grid Container */}
       <div className="bento-grid">
 
-        {/* 1. WhatsApp AI Copilot Bento (Col 8) */}
-        <div className="bento-card bento-col-8" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 16 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-            <div style={{
-              width: 54, height: 54, borderRadius: 16,
-              background: 'radial-gradient(circle, rgba(59, 130, 246, 0.35) 0%, rgba(37, 99, 235, 0.1) 100%)',
-              border: '2px solid rgba(59, 130, 246, 0.6)',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              color: '#60a5fa',
-              boxShadow: '0 0 20px rgba(59, 130, 246, 0.25)'
-            }}>
-              <Bot size={28} />
-            </div>
-            <div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                <h3 style={{ margin: 0, color: '#ffffff', fontSize: 17, fontWeight: 900, letterSpacing: '0.3px' }}>
-                  مساعد واتساب والرد الآلي الذكي
-                </h3>
-                {botSettings?.enabled !== false ? (
-                  <span style={{
-                    display: 'inline-flex', alignItems: 'center', gap: 6,
-                    background: 'rgba(16, 185, 129, 0.15)', border: '1px solid rgba(16, 185, 129, 0.4)',
-                    color: '#34d399', padding: '3px 10px', borderRadius: 20, fontSize: 12, fontWeight: 700
-                  }}>
-                    <span className="bento-pulse-dot" style={{ background: '#34d399', boxShadow: '0 0 8px #34d399' }} />
-                    متصل ونشط 24/7
-                  </span>
-                ) : (
-                  <span style={{
-                    display: 'inline-flex', alignItems: 'center', gap: 6,
-                    background: 'rgba(239, 68, 68, 0.15)', border: '1px solid rgba(239, 68, 68, 0.4)',
-                    color: '#f87171', padding: '3px 10px', borderRadius: 20, fontSize: 12, fontWeight: 700
-                  }}>
-                    <span className="bento-pulse-dot" style={{ background: '#f87171' }} />
-                    معطّل مؤقتاً
-                  </span>
-                )}
-              </div>
-              <p style={{ margin: '6px 0 0', color: '#93c5fd', fontSize: 13, lineHeight: 1.5 }}>
-                يستقبل رسائل الطلاب وأولياء الأمور ويرد فورياً بالباقات والأسعار مع إشعار فوري للإدارة.
-              </p>
-            </div>
-          </div>
-
-          <button
-            onClick={() => onNavigateTab && onNavigateTab('whatsapp_bot')}
-            className="bento-card-interactive"
-            style={{
-              background: 'linear-gradient(135deg, #1d4ed8, #3b82f6)',
-              color: '#ffffff',
-              border: '1px solid rgba(255, 255, 255, 0.15)',
-              borderRadius: 14,
-              padding: '11px 20px',
-              fontSize: 13,
-              fontWeight: 800,
-              boxShadow: '0 6px 18px rgba(37,99,235,0.4)',
-              fontFamily: 'Cairo, sans-serif',
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: 8
-            }}
-          >
-            <Settings size={15} /> إعدادات البوت
-          </button>
-        </div>
-
-        {/* 2. Live Occupancy Widget Bento (Col 4) */}
-        <div className="bento-col-4" style={{ display: 'flex' }}>
+        {/* 1. Live Occupancy Widget Bento (Full Width Col 12) */}
+        <div className="bento-col-12" style={{ display: 'flex' }}>
           <div style={{ width: '100%' }}>
             <OccupancyMeterWidget />
           </div>
