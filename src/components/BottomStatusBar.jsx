@@ -7,11 +7,17 @@ export default function BottomStatusBar({ activeShift = undefined, orgName = 'TH
   const { user } = useAuth();
   const [now, setNow] = useState(new Date());
   const [timeMode, setTimeModeState] = useState(getTimeMode());
+  const [isOnline, setIsOnline] = useState(typeof navigator !== 'undefined' ? navigator.onLine : true);
 
   // Manager/Admin check: ONLY Admin/Manager can change time!
   const isAdmin = user?.role === 'admin' || user?.role === 'manager';
 
   useEffect(() => {
+    const handleOnline = () => setIsOnline(true);
+    const handleOffline = () => setIsOnline(false);
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+
     const timer = setInterval(() => {
       setNow(new Date());
     }, 1000);
@@ -29,6 +35,8 @@ export default function BottomStatusBar({ activeShift = undefined, orgName = 'TH
 
     return () => {
       clearInterval(timer);
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
       window.removeEventListener('tfg_time_mode_changed', handleModeChange);
       unsub && unsub();
     };
@@ -156,8 +164,15 @@ export default function BottomStatusBar({ activeShift = undefined, orgName = 'TH
       <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
-            <span style={{ width: 7, height: 7, borderRadius: '50%', background: '#22c55e', display: 'inline-block', boxShadow: '0 0 8px #22c55e' }}></span>
-            <span style={{ color: '#86efac', fontSize: '11px', fontWeight: 700 }}>سحابي</span>
+            <span style={{
+              width: 7, height: 7, borderRadius: '50%',
+              background: isOnline ? '#22c55e' : '#f59e0b',
+              display: 'inline-block',
+              boxShadow: isOnline ? '0 0 8px #22c55e' : '0 0 8px #f59e0b'
+            }}></span>
+            <span style={{ color: isOnline ? '#86efac' : '#fcd34d', fontSize: '11px', fontWeight: 700 }}>
+              {isOnline ? 'سحابي متصل' : 'أوفلاين (تخزين محلي)'}
+            </span>
           </div>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
