@@ -145,40 +145,40 @@ export default function AdminDashboard({ onNavigateTab }) {
           <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
             <div style={{
               width: 54, height: 54, borderRadius: 16,
-              background: 'radial-gradient(circle, rgba(59, 130, 246, 0.35) 0%, rgba(37, 99, 235, 0.1) 100%)',
-              border: '2px solid rgba(59, 130, 246, 0.6)',
+              background: 'radial-gradient(circle, rgba(27, 77, 62, 0.25) 0%, rgba(27, 77, 62, 0.08) 100%)',
+              border: '2px solid rgba(27, 77, 62, 0.5)',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
-              color: '#60a5fa',
-              boxShadow: '0 0 20px rgba(59, 130, 246, 0.25)'
+              color: 'var(--accent)',
+              boxShadow: '0 0 20px rgba(27, 77, 62, 0.2)'
             }}>
               <Bot size={28} />
             </div>
             <div>
               <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                <h3 style={{ margin: 0, color: '#ffffff', fontSize: 17, fontWeight: 900, letterSpacing: '0.3px' }}>
+                <h3 style={{ margin: 0, color: 'var(--text-primary)', fontSize: 17, fontWeight: 900, letterSpacing: '0.3px' }}>
                   مساعد واتساب والرد الآلي الذكي
                 </h3>
                 {botSettings?.enabled !== false ? (
                   <span style={{
                     display: 'inline-flex', alignItems: 'center', gap: 6,
                     background: 'rgba(16, 185, 129, 0.15)', border: '1px solid rgba(16, 185, 129, 0.4)',
-                    color: '#34d399', padding: '3px 10px', borderRadius: 20, fontSize: 12, fontWeight: 700
+                    color: '#059669', padding: '3px 10px', borderRadius: 20, fontSize: 12, fontWeight: 700
                   }}>
-                    <span className="bento-pulse-dot" style={{ background: '#34d399', boxShadow: '0 0 8px #34d399' }} />
+                    <span className="bento-pulse-dot" style={{ background: '#059669', boxShadow: '0 0 8px #059669' }} />
                     متصل ونشط 24/7
                   </span>
                 ) : (
                   <span style={{
                     display: 'inline-flex', alignItems: 'center', gap: 6,
                     background: 'rgba(239, 68, 68, 0.15)', border: '1px solid rgba(239, 68, 68, 0.4)',
-                    color: '#f87171', padding: '3px 10px', borderRadius: 20, fontSize: 12, fontWeight: 700
+                    color: '#dc2626', padding: '3px 10px', borderRadius: 20, fontSize: 12, fontWeight: 700
                   }}>
-                    <span className="bento-pulse-dot" style={{ background: '#f87171' }} />
+                    <span className="bento-pulse-dot" style={{ background: '#dc2626' }} />
                     معطّل مؤقتاً
                   </span>
                 )}
               </div>
-              <p style={{ margin: '6px 0 0', color: '#93c5fd', fontSize: 13, lineHeight: 1.5 }}>
+              <p style={{ margin: '6px 0 0', color: 'var(--text-secondary)', fontSize: 13, lineHeight: 1.5 }}>
                 يستقبل رسائل الطلاب وأولياء الأمور ويرد فورياً بالباقات والأسعار مع إشعار فوري للإدارة.
               </p>
             </div>
@@ -186,20 +186,12 @@ export default function AdminDashboard({ onNavigateTab }) {
 
           <button
             onClick={() => onNavigateTab && onNavigateTab('whatsapp_bot')}
-            className="bento-card-interactive"
+            className="btn btn-primary bento-card-interactive"
             style={{
-              background: 'linear-gradient(135deg, #1d4ed8, #3b82f6)',
-              color: '#ffffff',
-              border: '1px solid rgba(255, 255, 255, 0.15)',
-              borderRadius: 14,
               padding: '11px 20px',
               fontSize: 13,
               fontWeight: 800,
-              boxShadow: '0 6px 18px rgba(37,99,235,0.4)',
-              fontFamily: 'Cairo, sans-serif',
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: 8
+              fontFamily: 'Cairo, sans-serif'
             }}
           >
             <Settings size={15} /> إعدادات البوت
@@ -217,7 +209,7 @@ export default function AdminDashboard({ onNavigateTab }) {
         <div className={`bento-card bento-col-8 ${netAmount >= 0 ? 'bento-card-emerald' : 'bento-card-amber'}`}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 12 }}>
             <div>
-              <span style={{ fontSize: 13, color: '#93c5fd', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+              <span style={{ fontSize: 13, color: 'var(--text-secondary)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
                 الأداء المالي لشهر {curMonth}
               </span>
               <div style={{ display: 'flex', alignItems: 'baseline', gap: 12, marginTop: 4 }}>
@@ -225,16 +217,15 @@ export default function AdminDashboard({ onNavigateTab }) {
                   margin: 0,
                   fontSize: 34,
                   fontWeight: 900,
-                  color: netAmount >= 0 ? '#34d399' : '#f87171',
-                  textShadow: netAmount >= 0 ? '0 0 25px rgba(52, 211, 153, 0.3)' : '0 0 25px rgba(248, 113, 113, 0.3)'
+                  color: netAmount >= 0 ? '#059669' : '#dc2626'
                 }}>
                   {formatCurrency(netAmount)}
                 </h1>
                 <span style={{
                   fontSize: 13, fontWeight: 700,
-                  color: netAmount >= 0 ? '#34d399' : '#f87171',
+                  color: netAmount >= 0 ? '#059669' : '#dc2626',
                   background: netAmount >= 0 ? 'rgba(16, 185, 129, 0.15)' : 'rgba(239, 68, 68, 0.15)',
-                  padding: '3px 10px', borderRadius: 12, border: '1px solid rgba(255, 255, 255, 0.1)'
+                  padding: '3px 10px', borderRadius: 12, border: '1px solid rgba(226, 220, 209, 0.5)'
                 }}>
                   {netAmount >= 0 ? 'صافي أرباح تشغيلية فائضة' : 'عجز تشغيلي مؤقت'}
                 </span>
@@ -263,30 +254,30 @@ export default function AdminDashboard({ onNavigateTab }) {
 
           {/* Revenue vs Expenses Ratio Bar */}
           <div style={{ marginTop: 22 }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, marginBottom: 8, color: '#c8dcf5' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, marginBottom: 8, color: 'var(--text-secondary)' }}>
               <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                <span style={{ width: 10, height: 10, borderRadius: '50%', background: '#34d399', display: 'inline-block' }} />
-                إجمالي المقبوضات: <strong style={{ color: '#ffffff' }}>{formatCurrency(totalRevenue)}</strong>
+                <span style={{ width: 10, height: 10, borderRadius: '50%', background: '#10b981', display: 'inline-block' }} />
+                إجمالي المقبوضات: <strong style={{ color: 'var(--text-primary)' }}>{formatCurrency(totalRevenue)}</strong>
               </span>
               <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                <span style={{ width: 10, height: 10, borderRadius: '50%', background: '#f87171', display: 'inline-block' }} />
-                المصروفات والرواتب: <strong style={{ color: '#ffffff' }}>{formatCurrency(totalExpenses)}</strong>
+                <span style={{ width: 10, height: 10, borderRadius: '50%', background: '#ef4444', display: 'inline-block' }} />
+                المصروفات والرواتب: <strong style={{ color: 'var(--text-primary)' }}>{formatCurrency(totalExpenses)}</strong>
               </span>
             </div>
 
             <div style={{
               width: '100%', height: 10, borderRadius: 10,
-              background: 'rgba(255, 255, 255, 0.08)', overflow: 'hidden', display: 'flex'
+              background: 'rgba(120, 110, 90, 0.12)', overflow: 'hidden', display: 'flex'
             }}>
               <div style={{
                 width: `${totalRevenue > 0 ? Math.min(100, Math.round((totalRevenue / (totalRevenue + totalExpenses || 1)) * 100)) : 50}%`,
-                background: 'linear-gradient(90deg, #10b981, #34d399)',
+                background: 'linear-gradient(90deg, #059669, #10b981)',
                 borderRadius: 10,
                 transition: 'width 0.8s ease'
               }} />
               <div style={{
                 width: `${totalExpenses > 0 ? Math.min(100, Math.round((totalExpenses / (totalRevenue + totalExpenses || 1)) * 100)) : 50}%`,
-                background: 'linear-gradient(90deg, #ef4444, #f87171)',
+                background: 'linear-gradient(90deg, #dc2626, #ef4444)',
                 borderRadius: 10,
                 transition: 'width 0.8s ease'
               }} />
@@ -301,34 +292,34 @@ export default function AdminDashboard({ onNavigateTab }) {
               <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                 <div style={{
                   width: 36, height: 36, borderRadius: 10,
-                  background: 'rgba(245, 158, 11, 0.2)', color: '#fbbf24',
+                  background: 'rgba(217, 119, 6, 0.15)', color: '#d97706',
                   display: 'flex', alignItems: 'center', justifyContent: 'center'
                 }}>
                   <Coffee size={18} />
                 </div>
-                <h3 style={{ margin: 0, color: '#ffffff', fontSize: 15, fontWeight: 800 }}>
+                <h3 style={{ margin: 0, color: 'var(--text-primary)', fontSize: 15, fontWeight: 800 }}>
                   كافيه TFG | CAFE
                 </h3>
               </div>
-              <span style={{ fontSize: 11, color: '#f59e0b', background: 'rgba(245, 158, 11, 0.15)', padding: '2px 8px', borderRadius: 8, fontWeight: 700 }}>
+              <span style={{ fontSize: 11, color: '#d97706', background: 'rgba(217, 119, 6, 0.12)', padding: '2px 8px', borderRadius: 8, fontWeight: 700 }}>
                 وردية {openCafeShifts.length > 0 ? 'نشطة' : 'مغلقة'}
               </span>
             </div>
 
-            <div style={{ fontSize: 26, fontWeight: 900, color: '#fbbf24', marginTop: 6 }}>
+            <div style={{ fontSize: 26, fontWeight: 900, color: '#d97706', marginTop: 6 }}>
               {formatCurrency(totalCafeRevenue)}
             </div>
-            <p style={{ margin: '4px 0 0', color: '#93c5fd', fontSize: 12 }}>
+            <p style={{ margin: '4px 0 0', color: 'var(--text-secondary)', fontSize: 12 }}>
               مبيعات الكافيه والمشروبات لهذا الشهر
             </p>
           </div>
 
-          <div style={{ borderTop: '1px solid rgba(255, 255, 255, 0.08)', paddingTop: 12, marginTop: 14, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <span style={{ fontSize: 12, color: '#94a3b8' }}>مصاريف ومشتريات: {formatCurrency(totalCafeExpenses)}</span>
+          <div style={{ borderTop: '1px solid rgba(226, 220, 209, 0.6)', paddingTop: 12, marginTop: 14, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>مصاريف ومشتريات: {formatCurrency(totalCafeExpenses)}</span>
             <button
               onClick={() => onNavigateTab && onNavigateTab('cafe_pos')}
               style={{
-                background: 'transparent', border: 'none', color: '#fbbf24',
+                background: 'transparent', border: 'none', color: '#d97706',
                 fontSize: 12, fontWeight: 700, cursor: 'pointer', padding: 0
               }}
             >
@@ -345,17 +336,17 @@ export default function AdminDashboard({ onNavigateTab }) {
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <div style={{
               width: 40, height: 40, borderRadius: 12,
-              background: 'rgba(59, 130, 246, 0.2)', color: '#60a5fa',
+              background: 'rgba(27, 77, 62, 0.12)', color: 'var(--accent)',
               display: 'flex', alignItems: 'center', justifyContent: 'center'
             }}>
               <Users size={20} />
             </div>
-            <span style={{ fontSize: 12, color: '#38bdf8', fontWeight: 700 }}>عرض الأعضاء ←</span>
+            <span style={{ fontSize: 12, color: 'var(--accent)', fontWeight: 700 }}>عرض الأعضاء ←</span>
           </div>
           <div style={{ marginTop: 14 }}>
-            <div style={{ fontSize: 30, fontWeight: 900, color: '#ffffff' }}>{clients.length}</div>
-            <span style={{ fontSize: 13, color: '#93c5fd', fontWeight: 600 }}>إجمالي الأعضاء والمشتركين</span>
-            <div style={{ fontSize: 12, color: '#64748b', marginTop: 4 }}>
+            <div style={{ fontSize: 30, fontWeight: 900, color: 'var(--text-primary)' }}>{clients.length}</div>
+            <span style={{ fontSize: 13, color: 'var(--text-secondary)', fontWeight: 600 }}>إجمالي الأعضاء والمشتركين</span>
+            <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 4 }}>
               منهم {packages.length} باقات وكورسات معتمدة
             </div>
           </div>
@@ -369,19 +360,19 @@ export default function AdminDashboard({ onNavigateTab }) {
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <div style={{
               width: 40, height: 40, borderRadius: 12,
-              background: 'rgba(168, 85, 247, 0.2)', color: '#c084fc',
+              background: 'rgba(168, 85, 247, 0.15)', color: '#9333ea',
               display: 'flex', alignItems: 'center', justifyContent: 'center'
             }}>
               <Package size={20} />
             </div>
-            <span style={{ fontSize: 12, color: '#c084fc', fontWeight: 700 }}>سجل التذاكر ←</span>
+            <span style={{ fontSize: 12, color: '#9333ea', fontWeight: 700 }}>سجل التذاكر ←</span>
           </div>
           <div style={{ marginTop: 14 }}>
-            <div style={{ fontSize: 30, fontWeight: 900, color: '#ffffff' }}>
+            <div style={{ fontSize: 30, fontWeight: 900, color: 'var(--text-primary)' }}>
               {formatCurrency(totalTicketsRevenue)}
             </div>
-            <span style={{ fontSize: 13, color: '#93c5fd', fontWeight: 600 }}>إيراد تذاكر اليوم الحر</span>
-            <div style={{ fontSize: 12, color: '#64748b', marginTop: 4 }}>
+            <span style={{ fontSize: 13, color: 'var(--text-secondary)', fontWeight: 600 }}>إيراد تذاكر اليوم الحر</span>
+            <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 4 }}>
               {tickets.length} عملية بيع تذكرة مسجلة
             </div>
           </div>
@@ -395,23 +386,23 @@ export default function AdminDashboard({ onNavigateTab }) {
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <div style={{
               width: 40, height: 40, borderRadius: 12,
-              background: 'rgba(16, 185, 129, 0.2)', color: '#34d399',
+              background: 'rgba(16, 185, 129, 0.15)', color: '#059669',
               display: 'flex', alignItems: 'center', justifyContent: 'center'
             }}>
               <Clock size={20} />
             </div>
             <span style={{
               display: 'inline-flex', alignItems: 'center', gap: 4,
-              fontSize: 12, color: '#34d399', fontWeight: 700
+              fontSize: 12, color: '#059669', fontWeight: 700
             }}>
-              <span className="bento-pulse-dot" style={{ background: '#34d399' }} />
+              <span className="bento-pulse-dot" style={{ background: '#059669' }} />
               {allOpenCount} وردية جارية
             </span>
           </div>
           <div style={{ marginTop: 14 }}>
-            <div style={{ fontSize: 30, fontWeight: 900, color: '#ffffff' }}>{allOpenCount}</div>
-            <span style={{ fontSize: 13, color: '#93c5fd', fontWeight: 600 }}>المناوبات المفتوحة الآن</span>
-            <div style={{ fontSize: 12, color: '#64748b', marginTop: 4 }}>
+            <div style={{ fontSize: 30, fontWeight: 900, color: 'var(--text-primary)' }}>{allOpenCount}</div>
+            <span style={{ fontSize: 13, color: 'var(--text-secondary)', fontWeight: 600 }}>المناوبات المفتوحة الآن</span>
+            <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 4 }}>
               الاستقبال والكافيه ومساحة العمل
             </div>
           </div>
@@ -420,13 +411,13 @@ export default function AdminDashboard({ onNavigateTab }) {
         {/* 8. Open Shifts Live Dock (Col 12) */}
         <div className="bento-card bento-col-12">
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-            <h2 style={{ color: '#ffffff', fontSize: 17, fontWeight: 800, margin: 0, display: 'flex', alignItems: 'center', gap: 10 }}>
-              <Clock size={20} color="#38bdf8" /> المناوبات المفتوحة في المكان ({allOpenCount})
+            <h2 style={{ color: 'var(--text-primary)', fontSize: 17, fontWeight: 800, margin: 0, display: 'flex', alignItems: 'center', gap: 10 }}>
+              <Clock size={20} color="var(--accent)" /> المناوبات المفتوحة في المكان ({allOpenCount})
             </h2>
             <button
               onClick={() => onNavigateTab && onNavigateTab('shifts')}
               style={{
-                background: 'transparent', border: 'none', color: '#38bdf8',
+                background: 'transparent', border: 'none', color: 'var(--accent)',
                 fontSize: 12, fontWeight: 700, cursor: 'pointer'
               }}
             >
@@ -436,7 +427,7 @@ export default function AdminDashboard({ onNavigateTab }) {
 
           {allOpenCount === 0 ? (
             <div style={{ textAlign: 'center', padding: '36px 20px', background: 'rgba(0, 0, 0, 0.2)', borderRadius: 16 }}>
-              <p style={{ color: '#93c5fd', fontSize: 14, margin: 0 }}>
+              <p style={{ color: 'var(--text-secondary)', fontSize: 14, margin: 0 }}>
                 لا توجد مناوبات مفتوحة حالياً. يمكنك فتح مناوبة جديدة من تبويب الورديات.
               </p>
             </div>
@@ -444,50 +435,50 @@ export default function AdminDashboard({ onNavigateTab }) {
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 280px), 1fr))', gap: 14 }}>
               {openStaffShifts.map(s => (
                 <div key={s.id} style={{
-                  background: 'rgba(15, 23, 42, 0.6)',
-                  border: '1px solid rgba(245, 158, 11, 0.3)',
+                  background: 'var(--bg-elevated)',
+                  border: '1px solid rgba(217, 119, 6, 0.35)',
                   borderRadius: 16,
                   padding: '16px 18px',
                   display: 'flex', flexDirection: 'column', gap: 8
                 }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <span style={{ color: '#ffffff', fontWeight: 800, fontSize: 15, display: 'flex', alignItems: 'center', gap: 8 }}>
-                      <Building2 size={16} color="#60a5fa" /> {s.employeeName}
+                    <span style={{ color: 'var(--text-primary)', fontWeight: 800, fontSize: 15, display: 'flex', alignItems: 'center', gap: 8 }}>
+                      <Building2 size={16} color="var(--accent)" /> {s.employeeName}
                     </span>
                     <Badge color="amber">مناوبة جارية</Badge>
                   </div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', color: '#93c5fd', fontSize: 13, borderTop: '1px solid rgba(255,255,255,0.06)', paddingTop: 8 }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--text-secondary)', fontSize: 13, borderTop: '1px solid rgba(226, 220, 209, 0.6)', paddingTop: 8 }}>
                     <span>كاش الدرج المتوقع:</span>
-                    <strong style={{ color: '#38bdf8' }}>{formatCurrency(s.drawerCash !== undefined ? s.drawerCash : (s.cashRevenue || 0))}</strong>
+                    <strong style={{ color: 'var(--accent)' }}>{formatCurrency(s.drawerCash !== undefined ? s.drawerCash : (s.cashRevenue || 0))}</strong>
                   </div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', color: '#93c5fd', fontSize: 13 }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--text-secondary)', fontSize: 13 }}>
                     <span>إيرادات المناوبة:</span>
-                    <strong style={{ color: '#34d399' }}>{formatCurrency(s.totalRevenue || 0)}</strong>
+                    <strong style={{ color: '#059669' }}>{formatCurrency(s.totalRevenue || 0)}</strong>
                   </div>
                 </div>
               ))}
 
               {openCafeShifts.map(cs => (
                 <div key={cs.id} style={{
-                  background: 'rgba(15, 23, 42, 0.6)',
-                  border: '1px solid rgba(16, 185, 129, 0.3)',
+                  background: 'var(--bg-elevated)',
+                  border: '1px solid rgba(16, 185, 129, 0.35)',
                   borderRadius: 16,
                   padding: '16px 18px',
                   display: 'flex', flexDirection: 'column', gap: 8
                 }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <span style={{ color: '#ffffff', fontWeight: 800, fontSize: 15, display: 'flex', alignItems: 'center', gap: 8 }}>
-                      <Coffee size={16} color="#34d399" /> {cs.baristaName || 'باريستا الكافيه'}
+                    <span style={{ color: 'var(--text-primary)', fontWeight: 800, fontSize: 15, display: 'flex', alignItems: 'center', gap: 8 }}>
+                      <Coffee size={16} color="#059669" /> {cs.baristaName || 'باريستا الكافيه'}
                     </span>
                     <Badge color="green">كافيه نشط</Badge>
                   </div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', color: '#93c5fd', fontSize: 13, borderTop: '1px solid rgba(255,255,255,0.06)', paddingTop: 8 }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--text-secondary)', fontSize: 13, borderTop: '1px solid rgba(226, 220, 209, 0.6)', paddingTop: 8 }}>
                     <span>درج الكافيه:</span>
-                    <strong style={{ color: '#38bdf8' }}>{formatCurrency(cs.drawerCash || 0)}</strong>
+                    <strong style={{ color: 'var(--accent)' }}>{formatCurrency(cs.drawerCash || 0)}</strong>
                   </div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', color: '#93c5fd', fontSize: 13 }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--text-secondary)', fontSize: 13 }}>
                     <span>مبيعات الوردية:</span>
-                    <strong style={{ color: '#34d399' }}>{formatCurrency(cs.totalSales || 0)}</strong>
+                    <strong style={{ color: '#059669' }}>{formatCurrency(cs.totalSales || 0)}</strong>
                   </div>
                 </div>
               ))}

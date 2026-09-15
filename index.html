@@ -36,6 +36,9 @@
             }
           }
         });
+        // Theme Engine Bootstrapper: Default to Scandinavian Luxury & Warm Hospitality
+        var currentTheme = localStorage.getItem('tfg_theme') || 'scandinavian';
+        document.documentElement.setAttribute('data-theme', currentTheme);
       })();
     </script>
     <meta name="apple-mobile-web-app-capable" content="yes" />
