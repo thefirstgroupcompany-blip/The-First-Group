@@ -45,6 +45,8 @@ export default function CafePosTab({ initialSubTab = 'pos' } = {}) {
   const [clients, setClients] = useState([]);
   const [walletSearch, setWalletSearch] = useState('');
   const [selectedWalletClient, setSelectedWalletClient] = useState(null);
+  const [walletOtpInput, setWalletOtpInput] = useState('');
+  const [otpInputError, setOtpInputError] = useState('');
   const [walletOtpModalOpen, setWalletOtpModalOpen] = useState(false);
   const [walletOtpSubmitting, setWalletOtpSubmitting] = useState(false);
 
@@ -247,8 +249,11 @@ export default function CafePosTab({ initialSubTab = 'pos' } = {}) {
       if (clientBal < finalCartTotal) {
         return alert(`عذراً، رصيد محفظة المشترك (${selectedWalletClient.name}) لا يكفي.\nالرصيد المتاح: ${formatCurrency(clientBal)}\nوالمطلوب: ${formatCurrency(finalCartTotal)}`);
       }
-      // SECURITY: Require one-time OTP from client portal before debiting
-      setWalletOtpModalOpen(true);
+      if (!walletOtpInput || walletOtpInput.trim().length !== 4) {
+        setOtpInputError('يرجى إدخال كود الأمان المؤقت (4 أرقام) من هاتف العميل أولاً');
+        return;
+      }
+      await handleWalletOtpConfirm(walletOtpInput.trim());
       return;
     }
 
@@ -270,6 +275,8 @@ export default function CafePosTab({ initialSubTab = 'pos' } = {}) {
       setBuyerName('');
       setSelectedWalletClient(null);
       setWalletSearch('');
+      setWalletOtpInput('');
+      setOtpInputError('');
       setDiscountAmount('0');
       setLastSaleReceipt(completedSale);
     } catch (err) {
@@ -281,7 +288,9 @@ export default function CafePosTab({ initialSubTab = 'pos' } = {}) {
 
   const handleWalletOtpConfirm = async (otpCode) => {
     if (!selectedWalletClient || !activeShift) return;
+    setSaleLoading(true);
     setWalletOtpSubmitting(true);
+    setOtpInputError('');
     let walletTxId = null;
     try {
       const chargeRes = await verifyAndConsumeClientWalletOtp({
@@ -310,6 +319,8 @@ export default function CafePosTab({ initialSubTab = 'pos' } = {}) {
       setBuyerName('');
       setSelectedWalletClient(null);
       setWalletSearch('');
+      setWalletOtpInput('');
+      setOtpInputError('');
       setDiscountAmount('0');
       setLastSaleReceipt(completedSale);
       setWalletOtpModalOpen(false);
@@ -331,8 +342,10 @@ export default function CafePosTab({ initialSubTab = 'pos' } = {}) {
           console.error('Critical rollback error in CafePosTab:', rbErr);
         }
       }
+      setOtpInputError(err.message || 'كود الأمان المؤقت غير صحيح');
       throw err;
     } finally {
+      setSaleLoading(false);
       setWalletOtpSubmitting(false);
     }
   };
@@ -1060,20 +1073,65 @@ export default function CafePosTab({ initialSubTab = 'pos' } = {}) {
                             {formatCurrency((Number(selectedWalletClient.walletBalance) || 0) - finalCartTotal)}
                           </strong>
                         </div>
+                        {/* Direct 4-Digit OTP Input Field */}
                         <div style={{
-                          marginTop: 8,
-                          padding: '6px 10px',
-                          borderRadius: 8,
-                          background: 'rgba(168, 85, 247, 0.15)',
-                          border: '1px solid rgba(168, 85, 247, 0.3)',
+                          marginTop: 10,
+                          padding: '10px 12px',
+                          borderRadius: 10,
+                          background: 'rgba(0, 0, 0, 0.45)',
+                          border: otpInputError ? '1.5px solid #ef4444' : '1.5px solid rgba(168, 85, 247, 0.5)',
                           display: 'flex',
-                          alignItems: 'center',
-                          gap: 6,
-                          fontSize: 11,
-                          color: '#e9d5ff'
+                          flexDirection: 'column',
+                          gap: 6
                         }}>
-                          <ShieldCheck size={14} color="#c084fc" />
-                          <span>يتطلب كود أمان مؤقت (OTP) من هاتف العميل لتأكيد الخصم</span>
+                          <label style={{ color: '#d8b4fe', fontSize: 12, fontWeight: 800, display: 'flex', alignItems: 'center', gap: 6 }}>
+                            <Lock size={14} color="#c084fc" />
+                            <span>كود الأمان المؤقت (4 أرقام من هاتف المشترك):</span>
+                          </label>
+                          <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                            <input
+                              type="text"
+                              inputMode="numeric"
+                              pattern="[0-9]*"
+                              maxLength={4}
+                              placeholder="أدخل الـ 4 أرقام..."
+                              value={walletOtpInput}
+                              onChange={e => {
+                                setWalletOtpInput(e.target.value.replace(/\D/g, '').slice(0, 4));
+                                setOtpInputError('');
+                              }}
+                              onKeyDown={e => {
+                                if (e.key === 'Enter') {
+                                  e.preventDefault();
+                                  handleCheckout();
+                                }
+                              }}
+                              style={{
+                                width: '100%',
+                                background: '#0a0f1d',
+                                border: otpInputError ? '1.5px solid #ef4444' : '1.5px solid rgba(168, 85, 247, 0.6)',
+                                borderRadius: 8,
+                                padding: '8px 12px',
+                                color: '#ffffff',
+                                fontSize: 18,
+                                fontWeight: 900,
+                                letterSpacing: '6px',
+                                textAlign: 'center',
+                                outline: 'none',
+                                direction: 'ltr'
+                              }}
+                              autoFocus
+                            />
+                          </div>
+                          {otpInputError ? (
+                            <span style={{ color: '#f87171', fontSize: 11, fontWeight: 700 }}>
+                              ⚠️ {otpInputError}
+                            </span>
+                          ) : (
+                            <span style={{ color: '#94a3b8', fontSize: 10.5 }}>
+                              اطلب من المشترك فتح بوابته والضغط على «كود دفع الكافيه» لإعطائك الكود.
+                            </span>
+                          )}
                         </div>
                       </div>
                     )}
@@ -1085,9 +1143,26 @@ export default function CafePosTab({ initialSubTab = 'pos' } = {}) {
                 variant="success"
                 onClick={handleCheckout}
                 disabled={saleLoading || cart.length === 0 || !activeShift}
-                style={{ width: '100%', padding: 12, fontSize: 15, fontWeight: 800, marginTop: 6, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}
+                style={{
+                  width: '100%',
+                  padding: 12,
+                  fontSize: 15,
+                  fontWeight: 800,
+                  marginTop: 6,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: 6,
+                  background: paymentMethod === 'wallet_credit' ? 'linear-gradient(135deg, #7e22ce, #9333ea)' : undefined
+                }}
               >
-                {!activeShift ? 'افتح وردية TFG | CAFE أولاً للبيع' : <><CheckCircle2 size={16} /> تحصيل الفاتورة وطباعة البون</>}
+                {!activeShift ? 'افتح وردية TFG | CAFE أولاً للبيع' : (
+                  saleLoading ? 'جارٍ التحقق والخصم...' : (
+                    paymentMethod === 'wallet_credit'
+                      ? <><Lock size={16} /> تأكيد كود الأمان وخصم الفاتورة 🔒</>
+                      : <><CheckCircle2 size={16} /> تحصيل الفاتورة وطباعة البون</>
+                  )
+                )}
               </Button>
             </div>
           </Card>
