@@ -1325,3 +1325,137 @@ button:active:not(:disabled), .btn:active:not(:disabled) {
   0%, 100% { opacity: 1; transform: scale(1); }
   50% { opacity: 0.4; transform: scale(0.85); }
 }
+
+/* ========================================================
+   GLOBAL BENTO LUXURY DESIGN SYSTEM (ALL TABS, CARDS, FORMS)
+   ======================================================== */
+
+/* 1. All Cards across every tab */
+.dark-card, .glass-card, [class*="Card"] {
+  background: linear-gradient(145deg, rgba(14, 28, 54, 0.72) 0%, rgba(8, 17, 34, 0.88) 100%) !important;
+  border: 1px solid rgba(56, 189, 248, 0.18) !important;
+  border-radius: 20px !important;
+  backdrop-filter: blur(25px) !important;
+  -webkit-backdrop-filter: blur(25px) !important;
+  box-shadow: 0 16px 36px -10px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.08) !important;
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s ease, border-color 0.25s ease !important;
+}
+
+.dark-card:hover, .glass-card:hover {
+  border-color: rgba(56, 189, 248, 0.38) !important;
+  box-shadow: 0 24px 48px -12px rgba(0, 0, 0, 0.65), 0 0 25px rgba(56, 189, 248, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.14) !important;
+}
+
+/* 2. Apple-Style Micro-Interaction Buttons */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-family: 'Cairo', sans-serif;
+  font-weight: 700;
+  border-radius: 14px !important;
+  cursor: pointer;
+  transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  outline: none;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
+  position: relative;
+  overflow: hidden;
+}
+
+.btn:active {
+  transform: scale(0.965) !important;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #0284c7 0%, #2563eb 100%) !important;
+  color: #ffffff !important;
+  border: 1px solid rgba(255, 255, 255, 0.18) !important;
+  box-shadow: 0 6px 20px rgba(37, 99, 235, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.25) !important;
+}
+
+.btn-primary:hover {
+  background: linear-gradient(135deg, #0369a1 0%, #1d4ed8 100%) !important;
+  box-shadow: 0 8px 24px rgba(37, 99, 235, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.35) !important;
+  transform: translateY(-2px);
+}
+
+.btn-secondary {
+  background: rgba(15, 28, 54, 0.8) !important;
+  color: #c8dcf5 !important;
+  border: 1px solid rgba(56, 189, 248, 0.25) !important;
+}
+
+.btn-secondary:hover {
+  background: rgba(22, 42, 82, 0.9) !important;
+  color: #ffffff !important;
+  border-color: rgba(56, 189, 248, 0.45) !important;
+  transform: translateY(-2px);
+}
+
+.btn-success {
+  background: linear-gradient(135deg, #059669 0%, #10b981 100%) !important;
+  color: #ffffff !important;
+  border: 1px solid rgba(255, 255, 255, 0.18) !important;
+  box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4) !important;
+}
+
+.btn-danger {
+  background: linear-gradient(135deg, #dc2626 0%, #ef4444 100%) !important;
+  color: #ffffff !important;
+  border: 1px solid rgba(255, 255, 255, 0.18) !important;
+  box-shadow: 0 6px 20px rgba(239, 68, 68, 0.4) !important;
+}
+
+.btn-sm { padding: 7px 14px !important; font-size: 12px !important; }
+.btn-md { padding: 10px 20px !important; font-size: 14px !important; }
+.btn-lg { padding: 14px 28px !important; font-size: 16px !important; }
+
+/* 3. Inputs & Selects across the system */
+.dark-input, .dark-select, input[type="text"], input[type="number"], input[type="search"], input[type="date"], input[type="tel"] {
+  background: rgba(11, 23, 45, 0.85) !important;
+  border: 1px solid rgba(59, 130, 246, 0.28) !important;
+  border-radius: 14px !important;
+  color: #ffffff !important;
+  padding: 10px 14px !important;
+  transition: all 0.2s ease !important;
+  font-family: 'Cairo', sans-serif !important;
+}
+
+.dark-input:focus, .dark-select:focus, input:focus, select:focus {
+  border-color: #38bdf8 !important;
+  box-shadow: 0 0 16px rgba(56, 189, 248, 0.28), inset 0 1px 0 rgba(255, 255, 255, 0.05) !important;
+  outline: none !important;
+}
+
+/* 4. Sleek Tables (Clients, Shifts, Inventory, Payments) */
+table {
+  border-collapse: separate !important;
+  border-spacing: 0 6px !important;
+  width: 100%;
+}
+
+thead th {
+  background: rgba(12, 26, 51, 0.8) !important;
+  color: #93c5fd !important;
+  font-weight: 800 !important;
+  padding: 12px 16px !important;
+  border-bottom: 2px solid rgba(56, 189, 248, 0.2) !important;
+}
+
+tbody tr {
+  background: rgba(14, 28, 54, 0.55) !important;
+  border: 1px solid rgba(56, 189, 248, 0.1) !important;
+  border-radius: 12px !important;
+  transition: all 0.18s ease !important;
+}
+
+tbody tr:hover {
+  background: rgba(22, 44, 86, 0.75) !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3) !important;
+}
+
+tbody td {
+  padding: 12px 16px !important;
+  color: #ffffff !important;
+}
