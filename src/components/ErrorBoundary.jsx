@@ -1,4 +1,5 @@
-﻿import React from 'react';
+import React from 'react';
+import { logSystemDiagnostic } from '../services/diagnosticsService';
 
 export default class ErrorBoundary extends React.Component {
   constructor(props) {
@@ -12,6 +13,15 @@ export default class ErrorBoundary extends React.Component {
 
   componentDidCatch(error, errorInfo) {
     console.error('App Error Caught by ErrorBoundary:', error, errorInfo);
+    // Report crash to cloud diagnostics
+    try {
+      logSystemDiagnostic({
+        message: error?.message || String(error),
+        stack: error?.stack,
+        component: errorInfo?.componentStack || 'ErrorBoundary'
+      });
+    } catch (_) {}
+
     // Auto unregister SW and clear caches on error to prepare clean reload
     try {
       if ('serviceWorker' in navigator) {

@@ -46,6 +46,40 @@ export const AuthProvider = ({ children }) => {
     setUser(null);
   };
 
+  // Live session invalidation: Listen for account status changes in realtime
+  useEffect(() => {
+    if (!user?.id) return;
+    let unsub = null;
+    try {
+      import('../firebase').then(({ db }) => {
+        import('firebase/firestore').then(({ doc, onSnapshot }) => {
+          unsub = onSnapshot(doc(db, 'users', user.id), (snap) => {
+            if (!snap.exists()) {
+              // User was deleted from system -> revoke session immediately
+              logout();
+              alert('تم حذف هذا الحساب من قِبل إدارة النظام.');
+              window.location.replace('/');
+              return;
+            }
+            const data = snap.data();
+            if (data.status === 'disabled') {
+              // User was disabled -> revoke session immediately
+              logout();
+              alert('تم تعطيل هذا الحساب حالياً من قِبل إدارة النظام.');
+              window.location.replace('/');
+            }
+          }, (err) => {
+            console.warn('[Auth] Live user heartbeat error:', err);
+          });
+        });
+      });
+    } catch (_) {}
+
+    return () => {
+      if (unsub) unsub();
+    };
+  }, [user?.id]);
+
   return (
     <AuthContext.Provider value={{ user, login, logout }}>
       {children}
