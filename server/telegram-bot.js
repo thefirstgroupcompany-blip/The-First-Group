@@ -3,22 +3,39 @@
 // Provides real-time financial stats, shift status, net profit, and revenues.
 // ============================================================================
 
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
 import { initializeApp } from 'firebase/app';
 import { 
   getFirestore, collection, getDocs, query, where, orderBy, doc, getDoc 
 } from 'firebase/firestore';
 
-const BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN || '8182872390:AAFN9csS7W3tB0z1z3HPv8yjlv9xMyYmNS0';
-const AUTHORIZED_CHAT_ID = process.env.TELEGRAM_CHAT_ID || '8060299797';
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const envPath = path.resolve(__dirname, '..', '.env');
+const envVars = {};
+if (fs.existsSync(envPath)) {
+  fs.readFileSync(envPath, 'utf8').split('\n').forEach(line => {
+    const trimmed = line.trim();
+    if (trimmed && !trimmed.startsWith('#')) {
+      const idx = trimmed.indexOf('=');
+      if (idx !== -1) envVars[trimmed.slice(0, idx).trim()] = trimmed.slice(idx + 1).trim();
+    }
+  });
+}
+
+const BOT_TOKEN = envVars.VITE_TELEGRAM_BOT_TOKEN || process.env.TELEGRAM_BOT_TOKEN;
+const AUTHORIZED_CHAT_ID = envVars.VITE_TELEGRAM_CHAT_ID || process.env.TELEGRAM_CHAT_ID;
 
 const firebaseConfig = {
-  apiKey: "AIzaSyD5rfKKPwszn4MU_OXp6ffUbCgTZo0J_ak",
-  authDomain: "the-first-group-co.firebaseapp.com",
-  projectId: "the-first-group-co",
-  storageBucket: "the-first-group-co.firebasestorage.app",
-  messagingSenderId: "707174957075",
-  appId: "1:707174957075:web:044529b7db0b2518243fe6",
-  measurementId: "G-FQF7V4DVV9"
+  apiKey: envVars.VITE_FIREBASE_API_KEY || process.env.VITE_FIREBASE_API_KEY,
+  authDomain: envVars.VITE_FIREBASE_AUTH_DOMAIN || process.env.VITE_FIREBASE_AUTH_DOMAIN || "the-first-group-co.firebaseapp.com",
+  projectId: envVars.VITE_FIREBASE_PROJECT_ID || process.env.VITE_FIREBASE_PROJECT_ID || "the-first-group-co",
+  storageBucket: envVars.VITE_FIREBASE_STORAGE_BUCKET || process.env.VITE_FIREBASE_STORAGE_BUCKET || "the-first-group-co.firebasestorage.app",
+  messagingSenderId: envVars.VITE_FIREBASE_MESSAGING_SENDER_ID || process.env.VITE_FIREBASE_MESSAGING_SENDER_ID || "707174957075",
+  appId: envVars.VITE_FIREBASE_APP_ID || process.env.VITE_FIREBASE_APP_ID,
+  measurementId: envVars.VITE_FIREBASE_MEASUREMENT_ID || process.env.VITE_FIREBASE_MEASUREMENT_ID
 };
 
 const app = initializeApp(firebaseConfig);

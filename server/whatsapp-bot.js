@@ -4,17 +4,34 @@ import express from 'express';
 import cors from 'cors';
 import QRCode from 'qrcode';
 import qrcodeTerminal from 'qrcode-terminal';
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
 import { initializeApp } from 'firebase/app';
 import { getFirestore, collection, doc, addDoc, setDoc, onSnapshot, serverTimestamp } from 'firebase/firestore';
 
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const envPath = path.resolve(__dirname, '..', '.env');
+const envVars = {};
+if (fs.existsSync(envPath)) {
+  fs.readFileSync(envPath, 'utf8').split('\n').forEach(line => {
+    const trimmed = line.trim();
+    if (trimmed && !trimmed.startsWith('#')) {
+      const idx = trimmed.indexOf('=');
+      if (idx !== -1) envVars[trimmed.slice(0, idx).trim()] = trimmed.slice(idx + 1).trim();
+    }
+  });
+}
+
 // Firebase Client Config
 const firebaseConfig = {
-  apiKey: "AIzaSyD5rfKKPwszn4MU_OXp6ffUbCgTZo0J_ak",
-  authDomain: "the-first-group-co.firebaseapp.com",
-  projectId: "the-first-group-co",
-  storageBucket: "the-first-group-co.firebasestorage.app",
-  messagingSenderId: "707174957075",
-  appId: "1:707174957075:web:044529b7db0b2518243fe6"
+  apiKey: envVars.VITE_FIREBASE_API_KEY || process.env.VITE_FIREBASE_API_KEY,
+  authDomain: envVars.VITE_FIREBASE_AUTH_DOMAIN || process.env.VITE_FIREBASE_AUTH_DOMAIN || "the-first-group-co.firebaseapp.com",
+  projectId: envVars.VITE_FIREBASE_PROJECT_ID || process.env.VITE_FIREBASE_PROJECT_ID || "the-first-group-co",
+  storageBucket: envVars.VITE_FIREBASE_STORAGE_BUCKET || process.env.VITE_FIREBASE_STORAGE_BUCKET || "the-first-group-co.firebasestorage.app",
+  messagingSenderId: envVars.VITE_FIREBASE_MESSAGING_SENDER_ID || process.env.VITE_FIREBASE_MESSAGING_SENDER_ID || "707174957075",
+  appId: envVars.VITE_FIREBASE_APP_ID || process.env.VITE_FIREBASE_APP_ID
 };
 
 const appFb = initializeApp(firebaseConfig);

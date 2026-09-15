@@ -24,6 +24,11 @@ backups/
 tfg_snapshot*.json
 src_pre_glass_backup/
 lighthouse-report.*
+k6-summary.*
+check*.js
+repair*.js
+reset*.js
+wipe*.js
 
 # Editor directories and files
 .vscode/*
